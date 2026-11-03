@@ -2,10 +2,14 @@
 
 > **Parametric CAD & Cellular Voronoi Lamp Shade Generator for 3D Printing**
 
+[![Live Demo](https://img.shields.io/badge/Live_Demo-Vercel-black?logo=vercel&style=for-the-badge)](https://luxprint-studio-pyplhoyrr-steve-2a21.vercel.app)
+
 ![Three.js](https://img.shields.io/badge/Three.js-r160-black?logo=three.js)
 ![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-3.x-38bdf8?logo=tailwindcss)
 ![CSG](https://img.shields.io/badge/three--bvh--csg-v0.0.16-f59e0b)
 ![License](https://img.shields.io/badge/License-MIT-emerald)
+
+🌐 **Live Application:** [https://luxprint-studio-pyplhoyrr-steve-2a21.vercel.app](https://luxprint-studio-pyplhoyrr-steve-2a21.vercel.app)
 
 **LuminaPrint 3D** is a browser-based, zero-install parametric CAD studio for designing custom, watertight, 3D-printable lamp shades and lanterns. It features interactive 2D Bezier profile sculpting, procedural surface textures (sinusoidal ribs, origami knurling, pleated fins), algorithmic 360° cylindrical Voronoi CSG cutouts, hardware socket fitting, and direct binary `.STL` export formatted for modern slicers.
 
@@ -52,6 +56,11 @@
 
 ## 🚀 Quick Start (Running Live)
 
+### Web (Instant)
+Access the live studio directly in your browser without installing anything:
+👉 **[https://luxprint-studio-pyplhoyrr-steve-2a21.vercel.app](https://luxprint-studio-pyplhoyrr-steve-2a21.vercel.app)**
+
+### Running Locally
 Because LuminaPrint 3D uses modern browser ES Modules (`<script type="module">`) and importmaps, it should be served via a local web server (to prevent browser CORS restrictions when loading modules from `file:///`).
 
 ### Using Python
