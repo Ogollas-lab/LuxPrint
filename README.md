@@ -52,6 +52,12 @@
 - **Live Manifold Checker:** Real-time triangle counter and watertight manifold verification badge.
 - **Binary STL Export:** One-click download with automatic coordinate transformation (Three.js Y-up converted to 3D Slicer Z-up standard) and smart filename tagging (`LuminaPrint_Voronoi_H180mm.stl`).
 
+### 6. Intelligent Multi-Device Responsive Design
+- **Mobile Phones (320px–767px):** Full-screen dedicated 3D viewport with an instant segmented switch to controls, collapsible accordion parameter sections, touch-optimized 22px slider thumbs, floating quick-action buttons, and compact mobile status pills.
+- **Tablets (768px–1023px):** Fluid adaptive two-column layout (`w-80` sidebar + dynamic 3D canvas) supporting both portrait and landscape orientations.
+- **Laptops & Desktops (1024px+):** Professional CAD studio with full-featured side panel (`w-96`), expanded 3D viewport, and real-time mesh updates.
+- **Mobile & GPU Optimizations:** Dynamic `ResizeObserver` viewport tracking, iOS notch/home-bar safe-area support (`viewport-fit=cover`), touch Bezier sculpting with cancellation listeners, throttled WebGL animation loop when controls are active, and delayed blob revocation for seamless iOS `.STL` downloads.
+
 ---
 
 ## 🚀 Quick Start (Running Live)
