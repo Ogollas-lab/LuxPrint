@@ -62,9 +62,23 @@
 
 ## 🚀 Quick Start (Running Live)
 
-### Web (Instant)
-Access the live studio directly in your browser without installing anything:
-👉 **[https://luxprint-studio-pyplhoyrr-steve-2a21.vercel.app](https://luxprint-studio-pyplhoyrr-steve-2a21.vercel.app)**
+### Pages & Studio
+The public site is split into focused pages that share the same branding and navigation:
+
+- `/` or `/index.html` — product introduction and links to the dedicated information pages.
+- `/features.html` — capabilities available in the CAD studio.
+- `/how-it-works.html` — the five-step design and export workflow.
+- `/gallery.html` — illustrative design directions (not built-in presets).
+- `/faq.html` — product and 3D-printing workflow answers.
+- `/studio.html` — the full interactive CAD studio.
+
+The informational pages use the shared `site-pages.css` styling and `site-nav.js` mobile navigation. Each page contains only the content for its own purpose.
+
+### Live site
+Open the public homepage:
+👉 **[LuminaPrint 3D](https://luxprint-studio-pyplhoyrr-steve-2a21.vercel.app)**
+
+The CAD studio is available at **[/studio](https://luxprint-studio-pyplhoyrr-steve-2a21.vercel.app/studio)** (or `/studio.html`).
 
 ### Running Locally
 Because LuminaPrint 3D uses modern browser ES Modules (`<script type="module">`) and importmaps, it should be served via a local web server (to prevent browser CORS restrictions when loading modules from `file:///`).
@@ -106,7 +120,14 @@ Open **[http://localhost:3000](http://localhost:3000)** in your browser.
 
 ```
 LuxPrint/
-├── index.html            # Main web application entry point
+├── index.html            # Public product homepage
+├── features.html         # Dedicated feature overview
+├── how-it-works.html     # Design workflow walkthrough
+├── gallery.html          # Illustrative design gallery
+├── faq.html              # Product FAQ
+├── site-pages.css        # Shared informational-page styling
+├── site-nav.js           # Shared responsive page navigation
+├── studio.html           # Interactive CAD studio
 ├── 2D.html               # Dedicated 2D Bezier editor view / alternate entry point
 ├── lampshade_studio.html # Studio release entry point
 └── README.md             # Project documentation
@@ -124,4 +145,3 @@ LuxPrint/
 
 This project is licensed under the [MIT License](LICENSE).
 Feel free to create, modify, and 3D print your own custom designs!
-

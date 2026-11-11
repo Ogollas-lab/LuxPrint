@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#0b0d10">
+  <meta name="description" content="Answers to common questions about LuminaPrint 3D, CAD terms, customization, and preparing exported models for 3D printing.">
+  <title>FAQ | LuminaPrint 3D</title>
+  <link rel="stylesheet" href="./site-pages.css">
+  <script src="./site-nav.js" defer></script>
+</head>
+<body>
+  <header class="page-header" data-page-navigation>
+    <div class="page-container">
+      <nav class="page-nav" aria-label="Main navigation">
+        <a class="page-brand" href="./index.html"><span class="page-brand-mark" aria-hidden="true"></span>LuminaPrint 3D</a>
+        <div class="page-links">
+          <a href="./index.html">Home</a><a href="./features.html">Features</a><a href="./how-it-works.html">How It Works</a><a href="./gallery.html">Design Gallery</a><a href="./faq.html" aria-current="page">FAQ</a>
+        </div>
+        <a class="page-studio-link" href="./studio.html">Open Design Studio</a>
+        <button class="page-menu-toggle" data-menu-toggle type="button" aria-label="Open navigation menu" aria-expanded="false" aria-controls="mobile-navigation">☰</button>
+      </nav>
+      <div class="page-mobile-links" data-mobile-menu id="mobile-navigation">
+        <a href="./index.html">Home</a><a href="./features.html">Features</a><a href="./how-it-works.html">How It Works</a><a href="./gallery.html">Design Gallery</a><a href="./faq.html" aria-current="page">FAQ</a><a href="./studio.html">Open Design Studio</a>
+      </div>
+    </div>
+  </header>
+  <main>
+    <section class="page-hero">
+      <div class="page-container">
+        <span class="page-eyebrow">Helpful answers</span>
+        <h1 class="page-title">Questions, clearly answered.</h1>
+        <p class="page-intro">A quick reference for getting started, understanding the design terms, and taking an exported model to your slicer.</p>
+      </div>
+    </section>
+    <section class="page-content page-container" aria-label="Frequently asked questions">
+      <div class="faq-list">
+        <details class="faq-entry"><summary>What is LuminaPrint 3D?</summary><p>A browser-based parametric design studio for creating custom lamp shades and lanterns and exporting their geometry as 3D models.</p></details>
+        <details class="faq-entry"><summary>Do I need to install software?</summary><p>The design studio runs in a modern browser. A separate slicer and 3D printer are needed for preparing and making a physical part.</p></details>
+        <details class="faq-entry"><summary>Do I need previous CAD experience?</summary><p>No. The studio is based on visual controls for shaping the profile and changing design parameters. Familiarity with 3D printing can help when preparing the export.</p></details>
+        <details class="faq-entry"><summary>What is a Bézier profile?</summary><p>It is a smooth 2D curve adjusted with control points. In LuminaPrint, the curve defines the outline that becomes the lamp shade's overall shape.</p></details>
+        <details class="faq-entry"><summary>What are procedural patterns?</summary><p>They are repeating surfaces generated from design rules rather than sculpted by hand. LuminaPrint includes sinusoidal ribs, origami knurling, and pleated fins.</p></details>
+        <details class="faq-entry"><summary>What is a Voronoi pattern?</summary><p>Voronoi geometry divides a surface into irregular neighboring cells. LuminaPrint can use these cells as openings around a cylindrical shade.</p></details>
+        <details class="faq-entry"><summary>Can I customize my shade dimensions?</summary><p>Yes. The studio provides controls for height, top and bottom radii, wall thickness, and pattern settings within the supported ranges.</p></details>
+        <details class="faq-entry"><summary>What is an STL file?</summary><p>STL is a common format that represents a 3D surface as triangles. Slicer software can use it to prepare a model for a specific printer.</p></details>
+        <details class="faq-entry"><summary>Which slicers can I use?</summary><p>The exported STL can be opened in compatible slicers, including Cura, PrusaSlicer, and Bambu Studio. Confirm the resulting model and settings in your slicer.</p></details>
+        <details class="faq-entry"><summary>Can I print an exported design directly?</summary><p>The export is intended for 3D-printing workflows, but it is not a guarantee of success on every printer. Inspect the model in your slicer and choose suitable material, settings, and LED hardware.</p></details>
+      </div>
+    </section>
+  </main>
+  <footer class="page-footer"><div class="page-container page-footer-row"><span>LuminaPrint 3D · Parametric lighting design</span><div class="page-footer-links"><a href="./index.html">Home</a><a href="./features.html">Features</a><a href="./how-it-works.html">How It Works</a><a href="./gallery.html">Gallery</a></div></div></footer>
+</body>
+</html>

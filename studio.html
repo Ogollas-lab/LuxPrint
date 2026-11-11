@@ -1,0 +1,1786 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <title>LuminaPrint 3D - Parametric Lamp Shade Generator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script type="importmap">
+    {
+      "imports": {
+        "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+        "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/",
+        "three-mesh-bvh": "https://cdn.jsdelivr.net/npm/three-mesh-bvh@0.7.3/build/index.module.js",
+        "three-bvh-csg": "https://cdn.jsdelivr.net/npm/three-bvh-csg@0.0.16/build/index.module.js",
+        "d3-delaunay": "https://cdn.jsdelivr.net/npm/d3-delaunay@6.0.4/+esm"
+      }
+    }
+  </script>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            background-color: #0b1120;
+            color: #f8fafc;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        button, a, summary, label, select, input[type="color"] {
+            touch-action: manipulation;
+        }
+
+        #canvasContainer canvas {
+            touch-action: none;
+            display: block;
+            width: 100% !important;
+            height: 100% !important;
+        }
+
+        /* Safe area support for iOS notches */
+        @supports (padding-top: env(safe-area-inset-top)) {
+            header {
+                padding-top: max(0.5rem, env(safe-area-inset-top));
+            }
+            #sidebarPanel > div:last-child {
+                padding-bottom: max(0.75rem, env(safe-area-inset-bottom));
+            }
+        }
+
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #1e293b;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #475569;
+            border-radius: 3px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #64748b;
+        }
+
+        input[type="range"] {
+            accent-color: #f59e0b;
+            height: 6px;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            width: 22px;
+            height: 22px;
+            cursor: pointer;
+            border-radius: 50%;
+        }
+
+        input[type="range"]::-moz-range-thumb {
+            width: 22px;
+            height: 22px;
+            cursor: pointer;
+            border-radius: 50%;
+        }
+
+        /* Prevent unwanted horizontal overflow */
+        html, body {
+            max-width: 100vw;
+            overflow-x: hidden;
+        }
+
+        /* Clean accordion summary */
+        summary::-webkit-details-marker {
+            display: none;
+        }
+        summary {
+            list-style: none;
+        }
+        details > summary svg.chevron {
+            transition: transform 0.2s ease;
+        }
+        details[open] > summary svg.chevron {
+            transform: rotate(180deg);
+        }
+
+        /* 2D Bezier Interactive Canvas */
+        #bezierCanvas {
+            touch-action: none;
+            user-select: none;
+        }
+
+        .control-point {
+            cursor: grab;
+            fill: #f59e0b;
+            stroke: #ffffff;
+            stroke-width: 2px;
+            transition: r 0.15s ease, filter 0.15s ease;
+        }
+
+        .control-point:hover {
+            r: 7;
+            filter: drop-shadow(0 0 6px rgba(245, 158, 11, 0.8));
+        }
+
+        .control-point:active,
+        .control-point.active {
+            cursor: grabbing;
+            r: 8.5;
+            fill: #fbbf24;
+        }
+
+        .endpoint-point {
+            cursor: ew-resize;
+            fill: #38bdf8;
+            stroke: #ffffff;
+            stroke-width: 2px;
+            transition: r 0.15s ease, filter 0.15s ease;
+        }
+
+        .endpoint-point:hover {
+            r: 6;
+            filter: drop-shadow(0 0 6px rgba(56, 189, 248, 0.8));
+        }
+
+        .control-line {
+            stroke: #64748b;
+            stroke-width: 1.5;
+            stroke-dasharray: 4;
+        }
+
+        .curve-path {
+            fill: none;
+            stroke: #f59e0b;
+            stroke-width: 3;
+            stroke-linecap: round;
+        }
+
+        .axis-line {
+            stroke: #334155;
+            stroke-width: 1;
+            stroke-dasharray: 2;
+        }
+
+        .color-swatch {
+            transition: transform 0.15s ease, box-shadow 0.15s ease;
+        }
+
+        .color-swatch:hover {
+            transform: scale(1.15);
+        }
+
+        .color-swatch.active {
+            box-shadow: 0 0 0 2px #0b1120, 0 0 0 4px #f59e0b;
+            transform: scale(1.1);
+        }
+    </style>
+</head>
+
+<body class="flex flex-col md:flex-row h-screen h-[100dvh] w-screen overflow-hidden select-none bg-slate-950 text-slate-100 font-sans">
+
+    <!-- Mobile Top Header & Navigation Switcher (< md screens) -->
+    <header class="md:hidden flex items-center justify-between bg-slate-900/95 backdrop-blur-md border-b border-slate-800 px-3 py-2 z-30 shrink-0">
+        <div class="flex items-center gap-2">
+            <a href="./index.html" aria-label="LuminaPrint 3D home" class="flex items-center gap-2">
+                <svg class="w-5 h-5 text-amber-400 shrink-0" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 2a7 7 0 0 0-7 7c0 2.38 1.19 4.47 3 5.74V17a2 2 0 0 0 2 2h4a2 2 0 0 0 2-2v-2.26c1.81-1.27 3-3.36 3-5.74a7 7 0 0 0-7-7M9 21a1 1 0 0 0 1 1h4a1 1 0 0 0 1-1v-1H9z" />
+                </svg>
+                <div>
+                    <h1 class="text-sm font-bold text-amber-400 tracking-tight leading-none">LuminaPrint 3D</h1>
+                    <span class="text-[10px] text-slate-400 font-mono">mm units</span>
+                </div>
+            </a>
+
+        <!-- Mobile View Mode Segmented Switcher -->
+        <div class="flex bg-slate-950 rounded-lg p-0.5 border border-slate-800 text-xs font-medium">
+            <button id="mobileTabPreview" type="button"
+                class="px-3 py-1.5 rounded-md transition flex items-center gap-1.5 font-semibold bg-amber-500 text-slate-950 shadow-sm"
+                title="Switch to 3D View">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                </svg>
+                <span>3D View</span>
+            </button>
+            <button id="mobileTabParams" type="button"
+                class="px-3 py-1.5 rounded-md transition flex items-center gap-1.5 text-slate-400 hover:text-slate-200"
+                title="Switch to Parameters">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
+                </svg>
+                <span>Parameters</span>
+            </button>
+        </div>
+    </header>
+
+    <!-- Control Sidebar (On mobile: hidden when 3D is active, full-width when Parameters is active; On tablet: w-80; On desktop: w-96) -->
+    <aside id="sidebarPanel"
+        class="hidden md:flex flex-col w-full md:w-80 lg:w-96 bg-slate-900 border-r border-slate-800 h-full z-20 shadow-2xl shrink-0 overflow-hidden">
+        <!-- Desktop / Tablet Header -->
+        <div class="hidden md:flex p-4 border-b border-slate-800 items-center justify-between bg-slate-950/40">
+            <div>
+                <h1 class="text-lg font-bold text-amber-400 tracking-wide flex items-center gap-2">
+                    <a href="./index.html" aria-label="LuminaPrint 3D home" class="flex items-center gap-2">
+                        <svg class="w-5 h-5 text-amber-400" viewBox="0 0 24 24" fill="currentColor">
+                            <path
+                                d="M12 2a7 7 0 0 0-7 7c0 2.38 1.19 4.47 3 5.74V17a2 2 0 0 0 2 2h4a2 2 0 0 0 2-2v-2.26c1.81-1.27 3-3.36 3-5.74a7 7 0 0 0-7-7M9 21a1 1 0 0 0 1 1h4a1 1 0 0 0 1-1v-1H9z" />
+                        </svg>
+                        LuminaPrint 3D
+                    </a>
+                </h1>
+                <p class="text-xs text-slate-400">Parametric CAD & Cellular Voronoi Cutouts</p>
+            </div>
+            <span
+                class="text-xs bg-amber-500/10 text-amber-400 border border-amber-500/30 px-2.5 py-1 rounded-full font-mono font-medium">
+                mm units
+            </span>
+        </div>
+
+        <!-- Scrollable Controls List -->
+        <div class="flex-1 overflow-y-auto p-3 sm:p-4 space-y-3.5 sm:space-y-4 text-sm">
+
+            <!-- Mobile Quick "Jump to 3D" Pill -->
+            <button id="btnMobileJumpTo3D" type="button"
+                class="md:hidden w-full bg-slate-800 hover:bg-slate-700 text-amber-400 border border-amber-500/30 font-semibold py-2 px-3 rounded-xl text-xs flex items-center justify-center gap-2 shadow-sm transition">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                </svg>
+                <span>View in 3D Viewport</span>
+            </button>
+
+            <!-- Presets -->
+            <div class="bg-slate-800/25 p-3 rounded-xl border border-slate-800/80">
+                <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2">Design Presets</label>
+                <div class="grid grid-cols-2 sm:grid-cols-3 gap-1.5">
+                    <button data-preset="nordic" onclick="applyPreset('nordic')"
+                        class="bg-slate-800 hover:bg-slate-700 active:bg-amber-950/40 border border-slate-700 hover:border-amber-500/50 py-1.5 px-2 rounded-lg text-xs font-medium transition text-left flex flex-col">
+                        <span>Nordic Rib</span>
+                        <span class="text-[10px] text-amber-400 font-mono">Bulb</span>
+                    </button>
+                    <button data-preset="vortex" onclick="applyPreset('vortex')"
+                        class="bg-slate-800 hover:bg-slate-700 active:bg-amber-950/40 border border-slate-700 hover:border-amber-500/50 py-1.5 px-2 rounded-lg text-xs font-medium transition text-left flex flex-col">
+                        <span>Twisted Vase</span>
+                        <span class="text-[10px] text-amber-400 font-mono">Sine</span>
+                    </button>
+                    <button data-preset="diamond" onclick="applyPreset('diamond')"
+                        class="bg-slate-800 hover:bg-slate-700 active:bg-amber-950/40 border border-slate-700 hover:border-amber-500/50 py-1.5 px-2 rounded-lg text-xs font-medium transition text-left flex flex-col">
+                        <span>Origami Knurl</span>
+                        <span class="text-[10px] text-amber-400 font-mono">Lattice</span>
+                    </button>
+                    <button data-preset="bezier" onclick="applyPreset('bezier')"
+                        class="bg-amber-950/30 hover:bg-amber-900/50 border border-amber-600/40 text-amber-300 py-1.5 px-2 rounded-lg text-xs font-medium transition text-left flex flex-col">
+                        <span>Bezier Bell</span>
+                        <span class="text-[10px] text-amber-300 font-mono">Curve</span>
+                    </button>
+                    <button data-preset="voronoi" onclick="applyPreset('voronoi')"
+                        class="bg-gradient-to-r from-amber-500/20 to-orange-500/20 hover:from-amber-500/30 hover:to-orange-500/30 border border-amber-500/50 text-amber-300 py-1.5 px-2 rounded-lg text-xs font-semibold transition text-left flex flex-col col-span-2 sm:col-span-2">
+                        <span class="flex items-center gap-1">
+                            <span>✨ Voronoi Lantern</span>
+                        </span>
+                        <span class="text-[10px] text-amber-400 font-mono">Cellular CSG Cutouts</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- 1. Base Dimensions -->
+            <details id="details-dimensions" open class="group bg-slate-800/40 rounded-xl border border-slate-800 shadow-sm overflow-hidden">
+                <summary class="flex items-center justify-between p-3 sm:p-3.5 cursor-pointer list-none select-none hover:bg-slate-800/60 transition">
+                    <div class="flex items-center gap-2">
+                        <h2 class="font-semibold text-amber-300 text-xs uppercase tracking-wider">1. Dimensions (mm)</h2>
+                        <span id="dimBadge" class="text-[10px] text-slate-400 font-mono">H:180 MaxØ:164</span>
+                    </div>
+                    <svg class="chevron w-4 h-4 text-slate-400 group-open:rotate-180 transition-transform shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                    </svg>
+                </summary>
+
+                <div class="p-3 sm:p-3.5 pt-0 space-y-3">
+                    <div>
+                        <div class="flex justify-between text-xs mb-1">
+                            <span class="text-slate-300">Height</span>
+                            <span id="val-height" class="font-mono text-amber-400">180 mm</span>
+                        </div>
+                        <input id="height" type="range" min="60" max="350" value="180" step="1"
+                            class="w-full cursor-pointer" />
+                    </div>
+
+                    <div>
+                        <div class="flex justify-between text-xs mb-1">
+                            <span class="text-slate-300">Bottom Radius</span>
+                            <span id="val-bottomRadius" class="font-mono text-amber-400">70 mm</span>
+                        </div>
+                        <input id="bottomRadius" type="range" min="25" max="150" value="70" step="1"
+                            class="w-full cursor-pointer" />
+                    </div>
+
+                    <div>
+                        <div class="flex justify-between text-xs mb-1">
+                            <span class="text-slate-300">Top Radius</span>
+                            <span id="val-topRadius" class="font-mono text-amber-400">45 mm</span>
+                        </div>
+                        <input id="topRadius" type="range" min="20" max="150" value="45" step="1"
+                            class="w-full cursor-pointer" />
+                    </div>
+
+                    <div>
+                        <div class="flex justify-between text-xs mb-1">
+                            <span class="text-slate-300">Wall Thickness (Shell)</span>
+                            <span id="val-wallThickness" class="font-mono text-amber-400">2.0 mm</span>
+                        </div>
+                        <input id="wallThickness" type="range" min="1.0" max="5.0" value="2.0" step="0.2"
+                            class="w-full cursor-pointer" />
+                    </div>
+                </div>
+            </details>
+
+            <!-- 2. Silhouette & Wave Texture -->
+            <details id="details-silhouette" open class="group bg-slate-800/40 rounded-xl border border-slate-800 shadow-sm overflow-hidden">
+                <summary class="flex items-center justify-between p-3 sm:p-3.5 cursor-pointer list-none select-none hover:bg-slate-800/60 transition">
+                    <h2 class="font-semibold text-amber-300 text-xs uppercase tracking-wider">2. Silhouette & Ribs</h2>
+                    <svg class="chevron w-4 h-4 text-slate-400 group-open:rotate-180 transition-transform shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                    </svg>
+                </summary>
+
+                <div class="p-3 sm:p-3.5 pt-0 space-y-3">
+                    <div>
+                        <label class="block text-xs mb-1.5 text-slate-300">Vertical Silhouette Curve</label>
+                        <select id="profileType"
+                            class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-xs text-amber-100 focus:ring-1 focus:ring-amber-500 outline-none">
+                            <option value="linear">Linear Cone / Cylinder</option>
+                            <option value="bulb" selected>Belly / Bulbous</option>
+                            <option value="hourglass">Hourglass Waist</option>
+                            <option value="sine">S-Curve Wave</option>
+                            <option value="bezier" class="font-semibold text-amber-400">Custom 2D Bezier Curve</option>
+                        </select>
+                    </div>
+
+                    <!-- Math Curve Bulge Control -->
+                    <div id="mathBulgeControl">
+                        <div class="flex justify-between text-xs mb-1">
+                            <span class="text-slate-300">Curve Bulge</span>
+                            <span id="val-bulge" class="font-mono text-amber-400">18 mm</span>
+                        </div>
+                        <input id="bulge" type="range" min="-40" max="60" value="18" step="1"
+                            class="w-full cursor-pointer" />
+                    </div>
+
+                    <!-- Interactive 2D Bezier Profile Canvas -->
+                    <div id="bezierEditor"
+                        class="hidden flex-col items-center bg-slate-950/70 rounded-lg border border-slate-700 p-2.5">
+                        <div class="w-full flex justify-between text-[11px] text-slate-400 mb-1 font-mono">
+                            <span>Axis (r=0)</span>
+                            <span class="text-amber-400">● Drag CP1/CP2 / Ends</span>
+                        </div>
+                        <svg id="bezierCanvas" viewBox="-10 -10 170 170"
+                            class="w-full h-44 sm:h-48 max-w-[280px] bg-slate-950 rounded border border-slate-800">
+                            <line x1="0" y1="0" x2="0" y2="150" class="axis-line" stroke="#475569" stroke-width="1.5" />
+                            <line x1="0" y1="0" x2="150" y2="0" class="axis-line" />
+                            <line x1="0" y1="150" x2="150" y2="150" class="axis-line" />
+
+                            <path id="shadeFill" fill="rgba(245, 158, 11, 0.12)" stroke="none" />
+                            <line id="line1" class="control-line" />
+                            <line id="line2" class="control-line" />
+                            <path id="curvePath" class="curve-path" />
+
+                            <circle id="cpTop" class="endpoint-point" r="5" title="Top Radius (Drag left/right)" />
+                            <circle id="cp1" class="control-point" r="6" title="Control Point 1" />
+                            <circle id="cp2" class="control-point" r="6" title="Control Point 2" />
+                            <circle id="cpBot" class="endpoint-point" r="5" title="Bottom Radius (Drag left/right)" />
+                        </svg>
+                        <div class="w-full flex justify-between text-[10px] text-slate-500 mt-1 font-mono">
+                            <span id="cpInfoTop">Top: 45mm</span>
+                            <span id="cpInfoBot">Bot: 70mm</span>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs mb-1.5 text-slate-300">Surface Pattern</label>
+                        <select id="patternType"
+                            class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-xs text-slate-200 focus:ring-1 focus:ring-amber-500 outline-none">
+                            <option value="ribs" selected>Smooth Sinusoidal Ribs</option>
+                            <option value="sharp">Sharp Pleated Fins</option>
+                            <option value="knurl">Diamond Knurl / Lattice</option>
+                            <option value="smooth">Smooth (No Ribs)</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <div class="flex justify-between text-xs mb-1">
+                            <span class="text-slate-300">Rib Count</span>
+                            <span id="val-ribCount" class="font-mono text-amber-400">24</span>
+                        </div>
+                        <input id="ribCount" type="range" min="3" max="80" value="24" step="1"
+                            class="w-full cursor-pointer" />
+                    </div>
+
+                    <div>
+                        <div class="flex justify-between text-xs mb-1">
+                            <span class="text-slate-300">Rib Depth</span>
+                            <span id="val-ribDepth" class="font-mono text-amber-400">6.0 mm</span>
+                        </div>
+                        <input id="ribDepth" type="range" min="0" max="25" value="6" step="0.5"
+                            class="w-full cursor-pointer" />
+                    </div>
+
+                    <div>
+                        <div class="flex justify-between text-xs mb-1">
+                            <span class="text-slate-300">Helical Twist</span>
+                            <span id="val-twist" class="font-mono text-amber-400">90°</span>
+                        </div>
+                        <input id="twist" type="range" min="-360" max="360" value="90" step="5"
+                            class="w-full cursor-pointer" />
+                    </div>
+                </div>
+            </details>
+
+            <!-- 3. Cellular & Voronoi Cutout Section -->
+            <details id="details-voronoi" open class="group bg-slate-800/40 rounded-xl border border-slate-800 shadow-sm overflow-hidden">
+                <summary class="flex items-center justify-between p-3 sm:p-3.5 cursor-pointer list-none select-none hover:bg-slate-800/60 transition">
+                    <div class="flex items-center gap-1.5">
+                        <svg class="w-4 h-4 text-amber-400 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <polygon points="12 2 19 8.5 16 18 8 18 5 8.5 12 2" />
+                            <circle cx="12" cy="10" r="2" fill="currentColor" />
+                        </svg>
+                        <h2 class="font-semibold text-amber-300 text-xs uppercase tracking-wider">3. Voronoi Cutouts</h2>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <span id="csgStatusBadge" class="text-[10px] text-slate-400 font-mono">Off</span>
+                        <svg class="chevron w-4 h-4 text-slate-400 group-open:rotate-180 transition-transform shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                        </svg>
+                    </div>
+                </summary>
+
+                <div class="p-3 sm:p-3.5 pt-0 space-y-3">
+                    <!-- Toggle Voronoi Cutouts -->
+                    <div
+                        class="flex items-center justify-between p-2 rounded-lg bg-slate-900/60 border border-slate-700/60">
+                        <label for="voronoiToggle" class="text-xs font-medium text-slate-200 cursor-pointer flex flex-col pr-2">
+                            <span>Geometric Cutout Openings</span>
+                            <span class="text-[10px] text-slate-400 font-normal">Real 3D penetrations through wall</span>
+                        </label>
+                        <input type="checkbox" id="voronoiToggle" class="w-4 h-4 accent-amber-400 cursor-pointer shrink-0" />
+                    </div>
+
+                    <!-- Sub-controls visible only when Voronoi is enabled -->
+                    <div id="voronoiSubControls" class="space-y-3 pt-1 hidden">
+                        <div>
+                            <div class="flex justify-between text-xs mb-1">
+                                <span class="text-slate-300">Cell Density (Hole Count)</span>
+                                <span id="val-voronoiCount" class="font-mono text-amber-400">36</span>
+                            </div>
+                            <input id="voronoiCount" type="range" min="16" max="75" value="36" step="1"
+                                class="w-full cursor-pointer" />
+                        </div>
+
+                        <div>
+                            <div class="flex justify-between text-xs mb-1">
+                                <span class="text-slate-300">Cutout Aperture Scale</span>
+                                <span id="val-voronoiScale" class="font-mono text-amber-400">65%</span>
+                            </div>
+                            <input id="voronoiScale" type="range" min="0.40" max="0.82" value="0.65" step="0.02"
+                                class="w-full cursor-pointer" />
+                        </div>
+
+                        <div>
+                            <div class="flex justify-between items-center text-xs mb-1">
+                                <span class="text-slate-300">Pattern Seed</span>
+                                <button id="btnRandomizeSeed" type="button"
+                                    class="text-[10px] bg-slate-800 hover:bg-slate-700 text-amber-400 px-2 py-0.5 rounded border border-slate-700 transition">
+                                    🎲 Randomize
+                                </button>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <input id="voronoiSeed" type="range" min="1" max="100" value="42" step="1"
+                                    class="flex-1 cursor-pointer" />
+                                <span id="val-voronoiSeed" class="text-xs font-mono text-amber-400 w-8 text-right">42</span>
+                            </div>
+                        </div>
+
+                        <div>
+                            <div class="flex justify-between text-xs mb-1">
+                                <span class="text-slate-300">Solid Rim Margins</span>
+                                <span id="val-voronoiMargin" class="font-mono text-amber-400">16 mm</span>
+                            </div>
+                            <input id="voronoiMargin" type="range" min="10" max="30" value="16" step="1"
+                                class="w-full cursor-pointer" />
+                        </div>
+                    </div>
+                </div>
+            </details>
+
+            <!-- 4. Print Mode & Socket -->
+            <details id="details-socket" open class="group bg-slate-800/40 rounded-xl border border-slate-800 shadow-sm overflow-hidden">
+                <summary class="flex items-center justify-between p-3 sm:p-3.5 cursor-pointer list-none select-none hover:bg-slate-800/60 transition">
+                    <h2 class="font-semibold text-amber-300 text-xs uppercase tracking-wider">4. 3D Print Mode & Socket</h2>
+                    <svg class="chevron w-4 h-4 text-slate-400 group-open:rotate-180 transition-transform shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                    </svg>
+                </summary>
+
+                <div class="p-3 sm:p-3.5 pt-0 space-y-3">
+                    <div>
+                        <label class="block text-xs mb-1.5 text-slate-300">Slicer Mode</label>
+                        <select id="printMode"
+                            class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-xs text-slate-200 focus:ring-1 focus:ring-amber-500 outline-none">
+                            <option value="shell" selected>Hollow Shell + Inner Socket Spider</option>
+                            <option value="vase">Solid Base (For Spiral Vase Mode)</option>
+                        </select>
+                    </div>
+
+                    <div id="fitterControls" class="space-y-3 pt-1">
+                        <div>
+                            <div class="flex justify-between text-xs mb-1.5">
+                                <label class="text-slate-300">Socket Standard</label>
+                                <span id="socketStatusBadge" class="text-[10px] text-emerald-400 font-mono">Fitted</span>
+                            </div>
+                            <select id="socketPreset"
+                                class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-xs text-slate-200 focus:ring-1 focus:ring-amber-500 outline-none">
+                                <option value="41" selected>E27 / E26 Standard (41 mm)</option>
+                                <option value="29">E14 / Small Euro (29 mm)</option>
+                                <option value="10">Pendant Cord Grip (10 mm)</option>
+                                <option value="0">No Inner Spider (Open Tube)</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs mb-1.5 text-slate-300">Mount Position</label>
+                            <select id="mountPos"
+                                class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-xs text-slate-200 focus:ring-1 focus:ring-amber-500 outline-none">
+                                <option value="bottom" selected>Bottom (Table Lamp Base)</option>
+                                <option value="top">Top (Hanging Pendant Lamp)</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <div class="flex justify-between text-xs mb-1">
+                                <span class="text-slate-300">Spider Spoke Count</span>
+                                <span id="val-spokeCount" class="font-mono text-amber-400">3</span>
+                            </div>
+                            <input id="spokeCount" type="range" min="3" max="6" value="3" step="1"
+                                class="w-full cursor-pointer" />
+                        </div>
+                    </div>
+                </div>
+            </details>
+
+            <!-- 5. Mesh Resolution -->
+            <details id="details-mesh" class="group bg-slate-800/40 rounded-xl border border-slate-800 shadow-sm overflow-hidden">
+                <summary class="flex items-center justify-between p-3 sm:p-3.5 cursor-pointer list-none select-none hover:bg-slate-800/60 transition">
+                    <h2 class="font-semibold text-amber-300 text-xs uppercase tracking-wider">5. Mesh Resolution</h2>
+                    <svg class="chevron w-4 h-4 text-slate-400 group-open:rotate-180 transition-transform shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                    </svg>
+                </summary>
+                <div class="p-3 sm:p-3.5 pt-0 space-y-3">
+                    <div>
+                        <div class="flex justify-between text-xs mb-1">
+                            <span class="text-slate-300">Radial Segments</span>
+                            <span id="val-radialSegs" class="font-mono text-amber-400">180</span>
+                        </div>
+                        <input id="radialSegs" type="range" min="60" max="360" value="180" step="12"
+                            class="w-full cursor-pointer" />
+                    </div>
+                    <div>
+                        <div class="flex justify-between text-xs mb-1">
+                            <span class="text-slate-300">Vertical Layers</span>
+                            <span id="val-heightSegs" class="font-mono text-amber-400">90</span>
+                        </div>
+                        <input id="heightSegs" type="range" min="30" max="200" value="90" step="10"
+                            class="w-full cursor-pointer" />
+                    </div>
+                </div>
+            </details>
+
+        </div>
+
+        <!-- Bottom Export Bar -->
+        <div class="p-3 sm:p-4 border-t border-slate-800 bg-slate-950 space-y-2 shrink-0">
+            <div class="flex justify-between items-center text-xs text-slate-400">
+                <span id="polyCount" class="font-mono">Triangles: --</span>
+                <span class="inline-flex items-center gap-1.5 text-emerald-400 font-medium">
+                    <span id="manifoldDot" class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                    <span id="manifoldLabel">Watertight Manifold</span>
+                </span>
+            </div>
+            <button id="exportBtn"
+                class="w-full bg-amber-500 hover:bg-amber-400 active:bg-amber-600 text-slate-950 font-bold py-2.5 px-4 rounded-xl shadow-lg shadow-amber-500/20 transition-all flex items-center justify-center gap-2 text-sm">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 shrink-0" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd"
+                        d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z"
+                        clip-rule="evenodd" />
+                </svg>
+                <span>Download .STL for 3D Printing</span>
+            </button>
+        </div>
+    </aside>
+
+    <!-- 3D Viewport (Full width on mobile when 3D tab active, flexible alongside sidebar on tablet/desktop) -->
+    <main id="viewportPanel" class="flex-1 relative overflow-hidden bg-slate-950 flex flex-col h-full w-full">
+        <!-- Floating Viewport Toolbar -->
+        <div
+            class="absolute top-2 right-2 sm:top-4 sm:right-4 z-10 flex flex-wrap items-center gap-1.5 sm:gap-3 bg-slate-900/90 backdrop-blur-md border border-slate-700/80 px-2.5 py-1.5 sm:px-3.5 sm:py-2 rounded-xl shadow-xl text-xs max-w-[calc(100vw-1rem)] sm:max-w-none">
+            <!-- Filament Swatches -->
+            <div class="flex items-center gap-1.5" title="Filament Color Preview">
+                <button type="button"
+                    class="color-swatch w-5 h-5 sm:w-4 sm:h-4 rounded-full border border-slate-600 ring-amber-400 bg-[#fffbeb] active"
+                    data-color="#fffbeb" title="Warm Ivory"></button>
+                <button type="button"
+                    class="color-swatch w-5 h-5 sm:w-4 sm:h-4 rounded-full border border-slate-600 ring-amber-400 bg-[#fdfbf7]"
+                    data-color="#fdfbf7" title="Translucent White"></button>
+                <button type="button"
+                    class="color-swatch w-5 h-5 sm:w-4 sm:h-4 rounded-full border border-slate-600 ring-amber-400 bg-[#c86d51]"
+                    data-color="#c86d51" title="Terracotta"></button>
+                <button type="button"
+                    class="color-swatch w-5 h-5 sm:w-4 sm:h-4 rounded-full border border-slate-600 ring-amber-400 bg-[#607c68]"
+                    data-color="#607c68" title="Forest Sage"></button>
+                <button type="button"
+                    class="color-swatch w-5 h-5 sm:w-4 sm:h-4 rounded-full border border-slate-600 ring-amber-400 bg-[#1e232a]"
+                    data-color="#1e232a" title="Matte Obsidian"></button>
+                <input type="color" id="shadeColor" value="#fffbeb"
+                    class="w-5 h-5 rounded cursor-pointer border-0 bg-transparent" title="Custom Filament Color" />
+            </div>
+
+            <span class="text-slate-700 hidden sm:inline">|</span>
+
+            <!-- Light & Wireframe Toggles -->
+            <label class="flex items-center gap-1 cursor-pointer text-slate-300 hover:text-amber-300 transition">
+                <input type="checkbox" id="bulbToggle" checked class="accent-amber-400" />
+                <span class="hidden sm:inline">Bulb</span>
+            </label>
+
+            <span class="text-slate-700 hidden sm:inline">|</span>
+
+            <label class="flex items-center gap-1 cursor-pointer text-slate-300 hover:text-amber-300 transition">
+                <input type="checkbox" id="wireframeToggle" class="accent-amber-400" />
+                <span class="hidden sm:inline">Wireframe</span>
+            </label>
+
+            <span class="text-slate-700">|</span>
+
+            <!-- Reset Camera Button -->
+            <button id="resetCamBtn" class="text-slate-400 hover:text-amber-300 transition p-0.5 sm:p-1"
+                title="Reset Camera View">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                </svg>
+            </button>
+        </div>
+
+        <!-- Floating Mobile Quick Actions Bar (Shown when in 3D mode on small screens) -->
+        <div class="md:hidden absolute bottom-3 left-3 right-3 z-10 flex flex-col items-center gap-2 pointer-events-none">
+            <!-- Mobile Compact Status Pill -->
+            <div class="bg-slate-900/90 backdrop-blur-md border border-slate-700/80 px-3 py-1 rounded-full text-[11px] text-slate-300 flex items-center gap-2 pointer-events-auto shadow-lg">
+                <span id="mobilePolyCount" class="font-mono">Triangles: --</span>
+                <span class="text-slate-600">|</span>
+                <span class="inline-flex items-center gap-1.5 text-emerald-400 font-medium">
+                    <span id="mobileManifoldDot" class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                    <span id="mobileManifoldLabel">Watertight</span>
+                </span>
+            </div>
+
+            <div class="w-full flex items-center justify-between gap-2">
+                <button id="btnMobileOpenParams" type="button"
+                    class="pointer-events-auto bg-slate-900/90 backdrop-blur-md hover:bg-slate-800 active:bg-slate-700 text-amber-400 border border-slate-700/80 px-3 py-2 rounded-xl shadow-xl text-xs font-semibold flex items-center gap-1.5 transition">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
+                    </svg>
+                    <span>Edit Parameters</span>
+                </button>
+
+                <button id="btnMobileExport" type="button"
+                    class="pointer-events-auto bg-amber-500 hover:bg-amber-400 active:bg-amber-600 text-slate-950 font-bold px-3.5 py-2 rounded-xl shadow-xl text-xs flex items-center gap-1.5 transition">
+                    <svg class="w-3.5 h-3.5" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clip-rule="evenodd" />
+                    </svg>
+                    <span>Download .STL</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Slicer Tip Banner (Desktop & Tablet) -->
+        <div class="hidden md:flex absolute bottom-4 left-4 right-4 pointer-events-none justify-between items-end z-10">
+            <div
+                class="bg-slate-900/85 backdrop-blur-md border border-slate-800 p-3 rounded-xl max-w-lg text-xs text-slate-300 pointer-events-auto shadow-xl">
+                <div class="flex items-center gap-1.5 text-amber-400 font-semibold mb-0.5">
+                    <svg class="w-3.5 h-3.5" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd"
+                            d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
+                            clip-rule="evenodd" />
+                    </svg>
+                    <span id="tipHeading">3D Slicer Tip</span>
+                </div>
+                <span id="tipText">Use translucent/natural PLA or PETG with <strong class="text-slate-100">0%
+                        infill</strong> and <strong class="text-slate-100">2–3 perimeters</strong> for optimal
+                    diffusion. For Spiral Vase mode, check <strong class="text-slate-100">Spiralize Outer
+                        Contour</strong> in your slicer. Always install <strong class="text-amber-300">cool LED
+                        bulbs</strong>.</span>
+            </div>
+        </div>
+
+        <!-- WebGL Canvas Container -->
+        <div id="canvasContainer" class="w-full h-full flex-1"></div>
+    </main>
+
+    <script type="module">
+        import * as THREE from 'three';
+        import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+        import { STLExporter } from 'three/addons/exporters/STLExporter.js';
+        import * as BufferGeometryUtils from 'three/addons/utils/BufferGeometryUtils.js';
+        import { Delaunay } from 'd3-delaunay';
+        import { Evaluator, Brush, SUBTRACTION } from 'three-bvh-csg';
+
+        // --- Scene & Renderer Setup ---
+        const container = document.getElementById('canvasContainer');
+        const scene = new THREE.Scene();
+        scene.background = new THREE.Color(0x0b1120);
+
+        const camera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 1, 3000);
+        camera.position.set(0, 170, 380);
+
+        let renderer = null;
+        let controls = null;
+
+        try {
+            renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance' });
+            renderer.setSize(container.clientWidth || 1, container.clientHeight || 1);
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+            renderer.shadowMap.enabled = true;
+            renderer.toneMapping = THREE.ACESFilmicToneMapping;
+            renderer.toneMappingExposure = 1.1;
+            container.appendChild(renderer.domElement);
+
+            controls = new OrbitControls(camera, renderer.domElement);
+            controls.target.set(0, 90, 0);
+            controls.enableDamping = true;
+            controls.dampingFactor = 0.05;
+            controls.maxDistance = 1200;
+            controls.minDistance = 40;
+            controls.touches = {
+                ONE: THREE.TOUCH.ROTATE,
+                TWO: THREE.TOUCH.DOLLY_PAN
+            };
+        } catch (webglErr) {
+            console.error("WebGL initialization failed:", webglErr);
+            container.innerHTML = `
+                <div class="flex flex-col items-center justify-center h-full p-6 text-center text-slate-300">
+                    <svg class="w-12 h-12 text-amber-500 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                    </svg>
+                    <h3 class="text-base font-bold text-white mb-1">WebGL 3D Accelerated Graphics Unavailable</h3>
+                    <p class="text-xs text-slate-400 max-w-sm">Please enable hardware acceleration or WebGL in your browser settings to interact with the 3D parametric viewport.</p>
+                </div>
+            `;
+        }
+
+        // 3D Build Plate Grid (250x250mm standard bed)
+        const grid = new THREE.GridHelper(250, 25, 0xf59e0b, 0x1e293b);
+        grid.position.y = 0;
+        scene.add(grid);
+
+        // Studio Lighting
+        const ambientLight = new THREE.AmbientLight(0x94a3b8, 0.65);
+        scene.add(ambientLight);
+
+        const dirLight = new THREE.DirectionalLight(0xffffff, 0.7);
+        dirLight.position.set(160, 320, 220);
+        scene.add(dirLight);
+
+        const fillLight = new THREE.DirectionalLight(0x60a5fa, 0.25);
+        fillLight.position.set(-160, -100, -200);
+        scene.add(fillLight);
+
+        // Internal Simulated Light Bulb
+        const bulbLight = new THREE.PointLight(0xff9e22, 5.0, 500, 1.2);
+        bulbLight.position.set(0, 90, 0);
+        scene.add(bulbLight);
+
+        const bulbMesh = new THREE.Mesh(
+            new THREE.SphereGeometry(14, 28, 28),
+            new THREE.MeshBasicMaterial({ color: 0xffe8bb })
+        );
+        bulbMesh.position.copy(bulbLight.position);
+        scene.add(bulbMesh);
+
+        // Translucent 3D Printable Plastic Material
+        const shadeMaterial = new THREE.MeshPhysicalMaterial({
+            color: 0xfffbeb,
+            roughness: 0.28,
+            metalness: 0.02,
+            transmission: 0.38,
+            thickness: 2.2,
+            ior: 1.48,
+            side: THREE.DoubleSide // For cutouts, double-sided ensures inner cutout walls render perfectly
+        });
+
+        let shadeMesh = null;
+
+        // CSG Evaluator with optimized attribute set (only position and normal)
+        const csgEvaluator = new Evaluator();
+        csgEvaluator.useGroups = false;
+        csgEvaluator.attributes = ['position', 'normal'];
+
+        // --- 2D Bezier Profile Nodes ---
+        const bezierNodes = {
+            cp1: { r: 50, v: 0.75 },
+            cp2: { r: 110, v: 0.25 }
+        };
+
+        function solveBezierT(targetV, cp1V, cp2V) {
+            let low = 0, high = 1;
+            for (let iter = 0; iter < 16; iter++) {
+                const mid = (low + high) * 0.5;
+                const mt = 1 - mid;
+                const val = (mt * mt * mt) * 1.0 + 3 * (mt * mt) * mid * cp1V + 3 * mt * (mid * mid) * cp2V + (mid * mid * mid) * 0.0;
+                if (val > targetV) {
+                    low = mid;
+                } else {
+                    high = mid;
+                }
+            }
+            return (low + high) * 0.5;
+        }
+
+        function getBezierRadius(targetV, topR, botR) {
+            const vClamped = Math.max(0, Math.min(1, targetV));
+            const t = solveBezierT(vClamped, bezierNodes.cp1.v, bezierNodes.cp2.v);
+            const mt = 1 - t;
+            return (mt * mt * mt) * topR + 3 * (mt * mt) * t * bezierNodes.cp1.r + 3 * mt * (t * t) * bezierNodes.cp2.r + (t * t * t) * botR;
+        }
+
+        function updateBezierUI() {
+            const topR = parseFloat(document.getElementById('topRadius').value);
+            const botR = parseFloat(document.getElementById('bottomRadius').value);
+
+            const cp1X = bezierNodes.cp1.r;
+            const cp1Y = 150 - (bezierNodes.cp1.v * 150);
+            const cp2X = bezierNodes.cp2.r;
+            const cp2Y = 150 - (bezierNodes.cp2.v * 150);
+
+            const topX = Math.max(0, Math.min(150, topR));
+            const botX = Math.max(0, Math.min(150, botR));
+
+            document.getElementById('cpTop').setAttribute('cx', topX);
+            document.getElementById('cpTop').setAttribute('cy', 0);
+            document.getElementById('cpBot').setAttribute('cx', botX);
+            document.getElementById('cpBot').setAttribute('cy', 150);
+
+            document.getElementById('cp1').setAttribute('cx', cp1X);
+            document.getElementById('cp1').setAttribute('cy', cp1Y);
+            document.getElementById('cp2').setAttribute('cx', cp2X);
+            document.getElementById('cp2').setAttribute('cy', cp2Y);
+
+            document.getElementById('line1').setAttribute('x1', topX);
+            document.getElementById('line1').setAttribute('y1', 0);
+            document.getElementById('line1').setAttribute('x2', cp1X);
+            document.getElementById('line1').setAttribute('y2', cp1Y);
+
+            document.getElementById('line2').setAttribute('x1', botX);
+            document.getElementById('line2').setAttribute('y1', 150);
+            document.getElementById('line2').setAttribute('x2', cp2X);
+            document.getElementById('line2').setAttribute('y2', cp2Y);
+
+            const pathData = `M ${topX} 0 C ${cp1X} ${cp1Y}, ${cp2X} ${cp2Y}, ${botX} 150`;
+            document.getElementById('curvePath').setAttribute('d', pathData);
+            document.getElementById('shadeFill').setAttribute('d', `M 0 0 L ${topX} 0 C ${cp1X} ${cp1Y}, ${cp2X} ${cp2Y}, ${botX} 150 L 0 150 Z`);
+
+            document.getElementById('cpInfoTop').textContent = `Top: ${Math.round(topR)}mm`;
+            document.getElementById('cpInfoBot').textContent = `Bot: ${Math.round(botR)}mm`;
+        }
+
+        // SVG Drag Handling
+        let activeDragPoint = null;
+        const svg = document.getElementById('bezierCanvas');
+
+        function getSVGCoords(e) {
+            const pt = svg.createSVGPoint();
+            if (e.touches && e.touches.length > 0) {
+                pt.x = e.touches[0].clientX;
+                pt.y = e.touches[0].clientY;
+            } else {
+                pt.x = e.clientX;
+                pt.y = e.clientY;
+            }
+            return pt.matrixTransform(svg.getScreenCTM().inverse());
+        }
+
+        function startDrag(e, name) {
+            e.preventDefault();
+            activeDragPoint = name;
+            const el = document.getElementById(name);
+            if (el) el.classList.add('active');
+        }
+
+        ['cp1', 'cp2', 'cpTop', 'cpBot'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) {
+                el.addEventListener('mousedown', (e) => startDrag(e, id));
+                el.addEventListener('touchstart', (e) => startDrag(e, id), { passive: false });
+            }
+        });
+
+        window.addEventListener('mousemove', handleDrag);
+        window.addEventListener('touchmove', handleDrag, { passive: false });
+        window.addEventListener('mouseup', endDrag);
+        window.addEventListener('touchend', endDrag);
+        window.addEventListener('touchcancel', endDrag);
+        window.addEventListener('blur', endDrag);
+
+        function endDrag() {
+            if (activeDragPoint) {
+                const el = document.getElementById(activeDragPoint);
+                if (el) el.classList.remove('active');
+                activeDragPoint = null;
+                requestRebuild(false);
+            }
+        }
+
+        function handleDrag(e) {
+            if (!activeDragPoint) return;
+            e.preventDefault();
+            const pt = getSVGCoords(e);
+
+            if (activeDragPoint === 'cpTop') {
+                const clampedR = Math.max(20, Math.min(150, Math.round(pt.x)));
+                document.getElementById('topRadius').value = clampedR;
+                document.getElementById('val-topRadius').textContent = `${clampedR} mm`;
+            } else if (activeDragPoint === 'cpBot') {
+                const clampedR = Math.max(25, Math.min(150, Math.round(pt.x)));
+                document.getElementById('bottomRadius').value = clampedR;
+                document.getElementById('val-bottomRadius').textContent = `${clampedR} mm`;
+            } else if (bezierNodes[activeDragPoint]) {
+                const clampedR = Math.max(15, Math.min(150, Math.round(pt.x)));
+                const clampedV = Math.max(0.02, Math.min(0.98, 1 - (pt.y / 150)));
+                bezierNodes[activeDragPoint].r = clampedR;
+                bezierNodes[activeDragPoint].v = clampedV;
+            }
+
+            updateBezierUI();
+            requestRebuild(true);
+        }
+
+        // --- Parametric Surface Evaluation ---
+        function getBaseSilhouetteRadius(v, params) {
+            if (params.profileType === 'bezier') {
+                return getBezierRadius(v, params.topRadius, params.bottomRadius);
+            }
+            let r = params.bottomRadius * (1 - v) + params.topRadius * v;
+            if (params.profileType === 'bulb') {
+                r += params.bulge * Math.sin(v * Math.PI);
+            } else if (params.profileType === 'hourglass') {
+                r -= Math.abs(params.bulge) * Math.sin(v * Math.PI);
+            } else if (params.profileType === 'sine') {
+                r += params.bulge * Math.sin(v * Math.PI * 2);
+            }
+            return r;
+        }
+
+        function getOuterRadius(v, u, params) {
+            const baseR = getBaseSilhouetteRadius(v, params);
+            const twistRad = (params.twist * Math.PI) / 180;
+            const angle = u * Math.PI * 2;
+            let wave = 0;
+
+            if (params.patternType === 'ribs') {
+                wave = Math.sin(angle * params.ribCount + v * twistRad);
+            } else if (params.patternType === 'sharp') {
+                const arg = (angle * params.ribCount + v * twistRad) / Math.PI;
+                const normArg = ((arg % 2) + 2) % 2;
+                wave = Math.abs(normArg - 1) * 2 - 1;
+            } else if (params.patternType === 'knurl') {
+                wave = 2.0 * Math.sin(angle * params.ribCount + v * twistRad) * Math.cos(angle * params.ribCount - v * twistRad);
+            }
+
+            const rFinal = baseR + params.ribDepth * wave;
+            return Math.max(params.wallThickness + 2, rFinal);
+        }
+
+        // --- Watertight Manifold Geometry Generator ---
+        function createWatertightRevolve(params, isSolidVase) {
+            // For Voronoi cutting, use high enough resolution for crisp cuts, but optimal for CSG
+            const R = params.voronoiEnabled ? Math.min(params.radialSegs, 120) : params.radialSegs;
+            const H = params.voronoiEnabled ? Math.min(params.heightSegs, 64) : params.heightSegs;
+            const positions = [];
+            const indices = [];
+
+            // Outer surface vertices
+            for (let i = 0; i <= H; i++) {
+                const v = i / H;
+                const y = v * params.height;
+                for (let j = 0; j < R; j++) {
+                    const u = j / R;
+                    const theta = u * Math.PI * 2;
+                    const rad = getOuterRadius(v, u, params);
+                    positions.push(rad * Math.cos(theta), y, rad * Math.sin(theta));
+                }
+            }
+
+            if (isSolidVase) {
+                const bottomCenterIdx = positions.length / 3;
+                positions.push(0, 0, 0);
+                const topCenterIdx = positions.length / 3;
+                positions.push(0, params.height, 0);
+
+                // Outer wall quads (Wound CCW outward)
+                for (let i = 0; i < H; i++) {
+                    for (let j = 0; j < R; j++) {
+                        const jNext = (j + 1) % R;
+                        const a = i * R + j, b = i * R + jNext, c = (i + 1) * R + jNext, d = (i + 1) * R + j;
+                        indices.push(a, d, c, a, c, b);
+                    }
+                }
+
+                // Bottom cap (Normal points DOWN: [0, -1, 0])
+                for (let j = 0; j < R; j++) {
+                    const jNext = (j + 1) % R;
+                    indices.push(bottomCenterIdx, j, jNext);
+                }
+
+                // Top cap (Normal points UP: [0, 1, 0])
+                const topRow = H * R;
+                for (let j = 0; j < R; j++) {
+                    const jNext = (j + 1) % R;
+                    indices.push(topCenterIdx, topRow + jNext, topRow + j);
+                }
+            } else {
+                // Hollow Shell: inner surface vertices
+                const innerOffset = (H + 1) * R;
+                for (let i = 0; i <= H; i++) {
+                    const v = i / H;
+                    const y = v * params.height;
+                    for (let j = 0; j < R; j++) {
+                        const u = j / R;
+                        const theta = u * Math.PI * 2;
+                        const rad = Math.max(2, getOuterRadius(v, u, params) - params.wallThickness);
+                        positions.push(rad * Math.cos(theta), y, rad * Math.sin(theta));
+                    }
+                }
+
+                // Outer and Inner Wall quads
+                for (let i = 0; i < H; i++) {
+                    for (let j = 0; j < R; j++) {
+                        const jNext = (j + 1) % R;
+                        const a = i * R + j, b = i * R + jNext, c = (i + 1) * R + jNext, d = (i + 1) * R + j;
+                        indices.push(a, d, c, a, c, b);
+
+                        const ia = innerOffset + a, ib = innerOffset + b, ic = innerOffset + c, id = innerOffset + d;
+                        indices.push(ia, ib, ic, ia, ic, id);
+                    }
+                }
+
+                // Bottom Rim (Normal points DOWN: [0, -1, 0])
+                for (let j = 0; j < R; j++) {
+                    const jNext = (j + 1) % R;
+                    indices.push(j, jNext, innerOffset + jNext, j, innerOffset + jNext, innerOffset + j);
+                }
+
+                // Top Rim (Normal points UP: [0, 1, 0])
+                const topRow = H * R;
+                for (let j = 0; j < R; j++) {
+                    const jNext = (j + 1) % R;
+                    indices.push(topRow + j, innerOffset + topRow + jNext, topRow + jNext, topRow + j, innerOffset + topRow + j, innerOffset + topRow + jNext);
+                }
+            }
+
+            const geo = new THREE.BufferGeometry();
+            geo.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
+            geo.setIndex(indices);
+            geo.computeVertexNormals();
+            return geo;
+        }
+
+        // --- Collar Ring Generator ---
+        function createRingGeometry(innerR, outerR, height, yCenter, segs = 48) {
+            const positions = [];
+            const indices = [];
+            const yBot = yCenter - height / 2;
+            const yTop = yCenter + height / 2;
+
+            for (let ring = 0; ring < 4; ring++) {
+                const r = ring < 2 ? outerR : innerR;
+                const y = ring % 2 === 0 ? yBot : yTop;
+                for (let j = 0; j < segs; j++) {
+                    const theta = (j / segs) * Math.PI * 2;
+                    positions.push(r * Math.cos(theta), y, r * Math.sin(theta));
+                }
+            }
+
+            for (let j = 0; j < segs; j++) {
+                const jNext = (j + 1) % segs;
+                const ob1 = j, ob2 = jNext;
+                const ot1 = segs + j, ot2 = segs + jNext;
+                const ib1 = 2 * segs + j, ib2 = 2 * segs + jNext;
+                const it1 = 3 * segs + j, it2 = 3 * segs + jNext;
+
+                indices.push(ob1, ot2, ob2, ob1, ot1, ot2);
+                indices.push(ib1, ib2, it2, ib1, it2, it1);
+                indices.push(ot1, it2, ot2, ot1, it1, it2);
+                indices.push(ob1, ob2, ib2, ob1, ib2, ib1);
+            }
+
+            const geo = new THREE.BufferGeometry();
+            geo.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
+            geo.setIndex(indices);
+            geo.computeVertexNormals();
+            return geo;
+        }
+
+        // --- Voronoi 3D Cellular Cutting Subsystem ---
+        function generateVoronoiCutters(params) {
+            // Seeded pseudo-random number generator
+            let s = params.voronoiSeed;
+            function rand() {
+                s = (s * 9301 + 49297) % 233280;
+                return s / 233280;
+            }
+
+            // Safe solid margins (protect bottom rim, base, top rim, and mounting hardware)
+            const marginNorm = Math.max(0.08, Math.min(0.25, params.voronoiMargin / params.height));
+            const vMin = marginNorm;
+            const vMax = 1.0 - marginNorm;
+
+            if (vMax <= vMin + 0.1) return null;
+
+            // Generate base Voronoi sites in cylinder parameter space [0, 1] x [vMin, vMax]
+            const cellCount = params.voronoiCount;
+            const basePoints = [];
+            for (let i = 0; i < cellCount; i++) {
+                basePoints.push([rand(), vMin + rand() * (vMax - vMin)]);
+            }
+
+            // Triplicate in U (-1, 0, +1) for seamless 360° cylindrical wrapping
+            const allPoints = [];
+            for (let offset = -1; offset <= 1; offset++) {
+                for (const p of basePoints) {
+                    allPoints.push([p[0] + offset, p[1]]);
+                }
+            }
+
+            // Compute 2D Voronoi Diagram with d3-delaunay
+            const delaunay = Delaunay.from(allPoints);
+            const voronoi = delaunay.voronoi([-1, vMin - 0.05, 2, vMax + 0.05]);
+
+            const cutterGeos = [];
+            const cutterDepth = (params.wallThickness + params.ribDepth) * 2 + 30; // Generous cutting penetration
+
+            // Process the middle period (index cellCount to 2*cellCount - 1)
+            for (let i = cellCount; i < 2 * cellCount; i++) {
+                const poly = voronoi.cellPolygon(i);
+                if (!poly || poly.length < 4) continue;
+
+                // Compute cell centroid
+                let cu = 0, cv = 0;
+                const n = poly.length - 1;
+                for (let k = 0; k < n; k++) {
+                    cu += poly[k][0];
+                    cv += poly[k][1];
+                }
+                cu /= n;
+                cv /= n;
+
+                if (cv < vMin || cv > vMax) continue;
+
+                // Inset towards centroid by aperture scale
+                const scale = params.voronoiScale;
+                const insetVerts = [];
+                for (let k = 0; k < n; k++) {
+                    const uVal = cu + (poly[k][0] - cu) * scale;
+                    const vVal = cv + (poly[k][1] - cv) * scale;
+                    insetVerts.push([uVal, vVal]);
+                }
+
+                // Tangent-plane physical metrics around cell centroid
+                const thetaC = cu * Math.PI * 2;
+                const yC = cv * params.height;
+                const rMid = getOuterRadius(cv, cu, params) - params.wallThickness * 0.5;
+
+                // 2D planar shape in tangent millimeter coordinates
+                const shape = new THREE.Shape();
+                for (let k = 0; k < insetVerts.length; k++) {
+                    const du = insetVerts[k][0] - cu;
+                    const dv = insetVerts[k][1] - cv;
+                    const xTan = du * Math.PI * 2 * rMid;
+                    const yVert = dv * params.height;
+                    if (k === 0) shape.moveTo(xTan, yVert);
+                    else shape.lineTo(xTan, yVert);
+                }
+                shape.closePath();
+
+                // Extrude into watertight 3D cutting prism
+                const prismGeo = new THREE.ExtrudeGeometry(shape, {
+                    depth: cutterDepth,
+                    bevelEnabled: false,
+                    steps: 1
+                });
+                prismGeo.deleteAttribute('uv'); // Match attribute structure for CSG
+                prismGeo.translate(0, 0, -cutterDepth / 2);
+
+                // Align prism to surface normal and position in 3D space
+                const matrix = new THREE.Matrix4();
+                matrix.makeBasis(
+                    new THREE.Vector3(Math.sin(thetaC), 0, -Math.cos(thetaC)),
+                    new THREE.Vector3(0, 1, 0),
+                    new THREE.Vector3(Math.cos(thetaC), 0, Math.sin(thetaC))
+                );
+                matrix.setPosition(rMid * Math.cos(thetaC), yC, rMid * Math.sin(thetaC));
+                prismGeo.applyMatrix4(matrix);
+
+                cutterGeos.push(prismGeo);
+            }
+
+            if (cutterGeos.length === 0) return null;
+
+            const mergedCutters = BufferGeometryUtils.mergeGeometries(cutterGeos, false);
+            cutterGeos.forEach(g => g.dispose());
+            return mergedCutters;
+        }
+
+        // --- Core Scene Rebuild Flow ---
+        function getParams() {
+            return {
+                height: parseFloat(document.getElementById('height').value),
+                bottomRadius: parseFloat(document.getElementById('bottomRadius').value),
+                topRadius: parseFloat(document.getElementById('topRadius').value),
+                wallThickness: parseFloat(document.getElementById('wallThickness').value),
+                profileType: document.getElementById('profileType').value,
+                bulge: parseFloat(document.getElementById('bulge').value),
+                patternType: document.getElementById('patternType').value,
+                ribCount: parseInt(document.getElementById('ribCount').value, 10),
+                ribDepth: parseFloat(document.getElementById('ribDepth').value),
+                twist: parseFloat(document.getElementById('twist').value),
+                printMode: document.getElementById('printMode').value,
+                socketHoleDiam: parseFloat(document.getElementById('socketPreset').value),
+                mountPos: document.getElementById('mountPos').value,
+                spokeCount: parseInt(document.getElementById('spokeCount').value, 10),
+                radialSegs: parseInt(document.getElementById('radialSegs').value, 10),
+                heightSegs: parseInt(document.getElementById('heightSegs').value, 10),
+                voronoiEnabled: document.getElementById('voronoiToggle').checked,
+                voronoiCount: parseInt(document.getElementById('voronoiCount').value, 10),
+                voronoiScale: parseFloat(document.getElementById('voronoiScale').value),
+                voronoiSeed: parseInt(document.getElementById('voronoiSeed').value, 10),
+                voronoiMargin: parseFloat(document.getElementById('voronoiMargin').value),
+            };
+        }
+
+        function updateReadouts() {
+            const params = getParams();
+            document.getElementById('val-height').textContent = `${params.height} mm`;
+            document.getElementById('val-bottomRadius').textContent = `${params.bottomRadius} mm`;
+            document.getElementById('val-topRadius').textContent = `${params.topRadius} mm`;
+            document.getElementById('val-wallThickness').textContent = `${params.wallThickness.toFixed(1)} mm`;
+            document.getElementById('val-bulge').textContent = `${params.bulge} mm`;
+            document.getElementById('val-ribCount').textContent = params.ribCount;
+            document.getElementById('val-ribDepth').textContent = `${params.ribDepth.toFixed(1)} mm`;
+            document.getElementById('val-twist').textContent = `${params.twist}°`;
+            document.getElementById('val-spokeCount').textContent = params.spokeCount;
+            document.getElementById('val-radialSegs').textContent = params.radialSegs;
+            document.getElementById('val-heightSegs').textContent = params.heightSegs;
+
+            // Voronoi Readouts
+            document.getElementById('val-voronoiCount').textContent = params.voronoiCount;
+            document.getElementById('val-voronoiScale').textContent = `${Math.round(params.voronoiScale * 100)}%`;
+            document.getElementById('val-voronoiSeed').textContent = params.voronoiSeed;
+            document.getElementById('val-voronoiMargin').textContent = `${params.voronoiMargin} mm`;
+
+            // Conditional UI Visibility
+            const isBezier = params.profileType === 'bezier';
+            const showBulge = ['bulb', 'hourglass', 'sine'].includes(params.profileType);
+            document.getElementById('mathBulgeControl').style.display = showBulge ? 'block' : 'none';
+            document.getElementById('bezierEditor').style.display = isBezier ? 'flex' : 'none';
+            document.getElementById('fitterControls').style.display = params.printMode === 'shell' ? 'block' : 'none';
+            document.getElementById('voronoiSubControls').style.display = params.voronoiEnabled ? 'block' : 'none';
+
+            const csgBadge = document.getElementById('csgStatusBadge');
+            if (params.voronoiEnabled) {
+                csgBadge.textContent = "Active";
+                csgBadge.className = "text-[10px] text-amber-400 font-mono font-semibold";
+                document.getElementById('tipHeading').textContent = "Voronoi Printing Tip";
+                document.getElementById('tipText').innerHTML = "Print with <strong class='text-slate-100'>3-4 wall perimeters</strong> and <strong class='text-slate-100'>0% infill</strong>. The Voronoi bridging struts print cleanly without supports!";
+            } else {
+                csgBadge.textContent = "Off";
+                csgBadge.className = "text-[10px] text-slate-500 font-mono";
+                document.getElementById('tipHeading').textContent = "3D Slicer Tip";
+                document.getElementById('tipText').innerHTML = "Use translucent/natural PLA or PETG with <strong class='text-slate-100'>0% infill</strong> and <strong class='text-slate-100'>2–3 perimeters</strong> for optimal diffusion. For Spiral Vase mode, check <strong class='text-slate-100'>Spiralize Outer Contour</strong> in your slicer. Always install <strong class='text-amber-300'>cool LED bulbs</strong>.";
+            }
+
+            if (isBezier) updateBezierUI();
+        }
+
+        let isBuilding = false;
+        let rebuildQueued = false;
+        async function rebuildLamp() {
+            if (isBuilding) {
+                rebuildQueued = true;
+                return;
+            }
+            isBuilding = true;
+            rebuildQueued = false;
+
+            const params = getParams();
+            updateReadouts();
+
+            // When Voronoi is enabled, force Hollow Shell mode so cutouts penetrate walls properly
+            const isVase = params.printMode === 'vase' && !params.voronoiEnabled;
+            const tempGeometries = [];
+
+            const csgBadge = document.getElementById('csgStatusBadge');
+            if (params.voronoiEnabled) {
+                csgBadge.textContent = "Computing CSG...";
+                csgBadge.className = "text-[10px] text-amber-300 font-mono animate-pulse";
+                // Yield to allow browser to render "Computing CSG..." status
+                await new Promise(resolve => requestAnimationFrame(resolve));
+            }
+
+            try {
+                // 1. Generate base revolved hollow shell or solid vase
+                let mainRevolve = createWatertightRevolve(params, isVase);
+
+                // 2. Perform Voronoi CSG Boolean Subtraction if enabled
+                if (params.voronoiEnabled) {
+                    const cutters = generateVoronoiCutters(params);
+                    if (cutters) {
+                        const brushA = new Brush(mainRevolve);
+                        const brushB = new Brush(cutters);
+                        brushA.updateMatrixWorld();
+                        brushB.updateMatrixWorld();
+
+                        const resultBrush = csgEvaluator.evaluate(brushA, brushB, SUBTRACTION);
+                        mainRevolve.dispose();
+                        cutters.dispose();
+
+                        mainRevolve = resultBrush.geometry;
+                        mainRevolve.computeVertexNormals();
+
+                        csgBadge.textContent = "Watertight CSG";
+                        csgBadge.className = "text-[10px] text-emerald-400 font-mono font-medium";
+                    } else {
+                        csgBadge.textContent = "Margins Too Wide";
+                        csgBadge.className = "text-[10px] text-amber-400 font-mono";
+                    }
+                }
+
+                tempGeometries.push(mainRevolve);
+
+                // 3. Socket Spider Assembly (attached cleanly after CSG to preserve mounting integrity)
+                const socketBadge = document.getElementById('socketStatusBadge');
+                if (!isVase && params.socketHoleDiam > 0) {
+                    const ringInnerR = params.socketHoleDiam / 2;
+                    const ringOuterR = ringInnerR + 6;
+                    const ringHeight = 5;
+
+                    const marginY = Math.max(8, Math.min(22, params.height * 0.08));
+                    const yMount = params.mountPos === 'bottom' ? marginY : params.height - marginY;
+                    const vMount = yMount / params.height;
+
+                    const baseRAtMount = getBaseSilhouetteRadius(vMount, params);
+                    const patternWaveDepth = params.patternType === 'smooth' ? 0 : params.ribDepth;
+                    const minOuterRAtMount = Math.max(params.wallThickness + 2, baseRAtMount - patternWaveDepth);
+                    const maxInnerRAtMount = Math.max(2, minOuterRAtMount - params.wallThickness);
+
+                    if (maxInnerRAtMount > ringOuterR + 4) {
+                        socketBadge.textContent = "Fitted";
+                        socketBadge.className = "text-[10px] text-emerald-400 font-mono";
+
+                        tempGeometries.push(createRingGeometry(ringInnerR, ringOuterR, ringHeight, yMount));
+
+                        const outerLedgeOuter = maxInnerRAtMount;
+                        const outerLedgeInner = Math.max(ringOuterR + 2, outerLedgeOuter - 3.5);
+                        tempGeometries.push(createRingGeometry(outerLedgeInner, outerLedgeOuter, ringHeight, yMount));
+
+                        const spokeLen = outerLedgeInner - ringOuterR + 2;
+                        for (let s = 0; s < params.spokeCount; s++) {
+                            const angle = (s / params.spokeCount) * Math.PI * 2;
+                            const spokeGeo = new THREE.BoxGeometry(spokeLen, ringHeight, 5.5);
+                            spokeGeo.deleteAttribute('uv');
+                            const midR = ringOuterR + spokeLen / 2 - 1.0;
+                            spokeGeo.rotateY(-angle);
+                            spokeGeo.translate(Math.cos(angle) * midR, yMount, Math.sin(angle) * midR);
+                            tempGeometries.push(spokeGeo);
+                        }
+                    } else {
+                        socketBadge.textContent = "Too Narrow";
+                        socketBadge.className = "text-[10px] text-amber-400 font-mono";
+                    }
+                } else if (params.socketHoleDiam === 0) {
+                    socketBadge.textContent = "Open Tube";
+                    socketBadge.className = "text-[10px] text-slate-400 font-mono";
+                }
+
+                // Ensure all sub-assembly geometries are compatible for BufferGeometryUtils.mergeGeometries
+                // (CSG results are non-indexed, while primitives may be indexed)
+                const hasNonIndexed = tempGeometries.some(g => !g.index);
+                const hasIndexed = tempGeometries.some(g => !!g.index);
+
+                let normalizedGeos = tempGeometries;
+                let convertedGeos = [];
+
+                if (hasNonIndexed && hasIndexed) {
+                    normalizedGeos = tempGeometries.map(g => {
+                        if (g.index) {
+                            const nonIndexed = g.toNonIndexed();
+                            convertedGeos.push(nonIndexed);
+                            return nonIndexed;
+                        }
+                        return g;
+                    });
+                }
+
+                // Clean merge of all sub-assemblies
+                const mergedGeometry = BufferGeometryUtils.mergeGeometries(normalizedGeos, false);
+                convertedGeos.forEach(g => g.dispose());
+                tempGeometries.forEach(g => g.dispose());
+
+                if (!mergedGeometry) {
+                    console.error("BufferGeometryUtils.mergeGeometries returned null");
+                    return;
+                }
+
+                if (shadeMesh) {
+                    scene.remove(shadeMesh);
+                    shadeMesh.geometry.dispose();
+                }
+
+                shadeMesh = new THREE.Mesh(mergedGeometry, shadeMaterial);
+                shadeMesh.castShadow = true;
+                shadeMesh.receiveShadow = true;
+                scene.add(shadeMesh);
+
+                const centerY = params.height * 0.5;
+                bulbLight.position.set(0, centerY, 0);
+                bulbMesh.position.copy(bulbLight.position);
+                if (controls) controls.target.set(0, centerY, 0);
+
+                mergedGeometry.computeBoundingBox();
+                const bbox = mergedGeometry.boundingBox;
+                const maxDiameter = Math.round(Math.max(bbox.max.x - bbox.min.x, bbox.max.z - bbox.min.z));
+                const actualHeight = Math.round(bbox.max.y - bbox.min.y);
+                document.getElementById('dimBadge').textContent = `H:${actualHeight} MaxØ:${maxDiameter}`;
+
+                const triCount = mergedGeometry.index
+                    ? Math.round(mergedGeometry.index.count / 3)
+                    : Math.round(mergedGeometry.attributes.position.count / 3);
+                document.getElementById('polyCount').textContent = `Triangles: ${triCount.toLocaleString()}`;
+                const mobilePoly = document.getElementById('mobilePolyCount');
+                if (mobilePoly) mobilePoly.textContent = `${triCount.toLocaleString()} tris`;
+
+                const dot = document.getElementById('manifoldDot');
+                if (dot) dot.className = "w-2 h-2 rounded-full bg-emerald-500 animate-pulse";
+                const label = document.getElementById('manifoldLabel');
+                if (label) label.textContent = "Watertight Manifold";
+
+                const mobileDot = document.getElementById('mobileManifoldDot');
+                if (mobileDot) mobileDot.className = "w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse";
+                const mobileLabel = document.getElementById('mobileManifoldLabel');
+                if (mobileLabel) mobileLabel.textContent = "Watertight";
+            } catch (err) {
+                console.error("Rebuild error:", err);
+                const dot = document.getElementById('manifoldDot');
+                if (dot) dot.className = "w-2 h-2 rounded-full bg-rose-500";
+                const label = document.getElementById('manifoldLabel');
+                if (label) label.textContent = "Build Error";
+
+                const mobileDot = document.getElementById('mobileManifoldDot');
+                if (mobileDot) mobileDot.className = "w-1.5 h-1.5 rounded-full bg-rose-500";
+                const mobileLabel = document.getElementById('mobileManifoldLabel');
+                if (mobileLabel) mobileLabel.textContent = "Error";
+            } finally {
+                isBuilding = false;
+                if (rebuildQueued) {
+                    rebuildQueued = false;
+                    requestAnimationFrame(rebuildLamp);
+                }
+            }
+        }
+
+        // Throttled Rebuild Handler
+        let rebuildTimer = null;
+        function requestRebuild(debounce = false) {
+            updateReadouts();
+            const params = getParams();
+            // If Voronoi is active, debounce slightly to keep UI fluid during slider dragging
+            const delay = (debounce || params.voronoiEnabled) ? 220 : 0;
+            clearTimeout(rebuildTimer);
+            if (delay === 0) {
+                requestAnimationFrame(rebuildLamp);
+            } else {
+                rebuildTimer = setTimeout(() => {
+                    requestAnimationFrame(rebuildLamp);
+                }, delay);
+            }
+        }
+
+        // --- Event Listeners ---
+        document.querySelectorAll('input[type="range"]').forEach(el => {
+            el.addEventListener('input', () => requestRebuild(true));
+        });
+
+        document.querySelectorAll('select').forEach(el => {
+            el.addEventListener('change', () => requestRebuild(false));
+        });
+
+        document.getElementById('voronoiToggle').addEventListener('change', () => {
+            requestRebuild(false);
+        });
+
+        document.getElementById('btnRandomizeSeed').addEventListener('click', () => {
+            const newSeed = Math.floor(Math.random() * 99) + 1;
+            document.getElementById('voronoiSeed').value = newSeed;
+            document.getElementById('val-voronoiSeed').textContent = newSeed;
+            requestRebuild(false);
+        });
+
+        document.getElementById('bulbToggle').addEventListener('change', (e) => {
+            bulbLight.visible = e.target.checked;
+            bulbMesh.visible = e.target.checked;
+        });
+
+        document.getElementById('wireframeToggle').addEventListener('change', (e) => {
+            shadeMaterial.wireframe = e.target.checked;
+        });
+
+        // Filament Swatches & Color Picker
+        function setFilamentColor(hex) {
+            shadeMaterial.color.set(hex);
+            document.getElementById('shadeColor').value = hex;
+            document.querySelectorAll('.color-swatch').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.color.toLowerCase() === hex.toLowerCase());
+            });
+        }
+
+        document.querySelectorAll('.color-swatch').forEach(btn => {
+            btn.addEventListener('click', () => setFilamentColor(btn.dataset.color));
+        });
+
+        document.getElementById('shadeColor').addEventListener('input', (e) => {
+            setFilamentColor(e.target.value);
+        });
+
+        document.getElementById('resetCamBtn').addEventListener('click', () => {
+            const h = parseFloat(document.getElementById('height').value);
+            camera.position.set(0, h * 0.9, 380);
+            if (controls) {
+                controls.target.set(0, h * 0.5, 0);
+                controls.update();
+            }
+        });
+
+        // --- Presets ---
+        window.applyPreset = (name) => {
+            document.getElementById('voronoiToggle').checked = false;
+            const detSil = document.getElementById('details-silhouette');
+            const detVor = document.getElementById('details-voronoi');
+
+            if (name === 'nordic') {
+                document.getElementById('height').value = 180;
+                document.getElementById('bottomRadius').value = 75;
+                document.getElementById('topRadius').value = 45;
+                document.getElementById('wallThickness').value = 1.6;
+                document.getElementById('profileType').value = 'bulb';
+                document.getElementById('bulge').value = 22;
+                document.getElementById('patternType').value = 'ribs';
+                document.getElementById('ribCount').value = 28;
+                document.getElementById('ribDepth').value = 5.5;
+                document.getElementById('twist').value = 45;
+                setFilamentColor('#fffbeb');
+                if (detSil) detSil.open = true;
+            } else if (name === 'vortex') {
+                document.getElementById('height').value = 220;
+                document.getElementById('bottomRadius').value = 55;
+                document.getElementById('topRadius').value = 55;
+                document.getElementById('wallThickness').value = 1.6;
+                document.getElementById('profileType').value = 'sine';
+                document.getElementById('bulge').value = 16;
+                document.getElementById('patternType').value = 'sharp';
+                document.getElementById('ribCount').value = 18;
+                document.getElementById('ribDepth').value = 8.0;
+                document.getElementById('twist').value = 180;
+                setFilamentColor('#f59e0b');
+                if (detSil) detSil.open = true;
+            } else if (name === 'diamond') {
+                document.getElementById('height').value = 160;
+                document.getElementById('bottomRadius').value = 65;
+                document.getElementById('topRadius').value = 65;
+                document.getElementById('wallThickness').value = 1.6;
+                document.getElementById('profileType').value = 'bulb';
+                document.getElementById('bulge').value = 12;
+                document.getElementById('patternType').value = 'knurl';
+                document.getElementById('ribCount').value = 20;
+                document.getElementById('ribDepth').value = 6.5;
+                document.getElementById('twist').value = 110;
+                setFilamentColor('#607c68');
+                if (detSil) detSil.open = true;
+            } else if (name === 'bezier') {
+                document.getElementById('height').value = 190;
+                document.getElementById('bottomRadius').value = 100;
+                document.getElementById('topRadius').value = 35;
+                document.getElementById('wallThickness').value = 1.8;
+                document.getElementById('profileType').value = 'bezier';
+                bezierNodes.cp1 = { r: 42, v: 0.78 };
+                bezierNodes.cp2 = { r: 115, v: 0.22 };
+                document.getElementById('patternType').value = 'smooth';
+                document.getElementById('ribDepth').value = 0;
+                document.getElementById('twist').value = 0;
+                setFilamentColor('#c86d51');
+                if (detSil) detSil.open = true;
+            } else if (name === 'voronoi') {
+                document.getElementById('height').value = 175;
+                document.getElementById('bottomRadius').value = 72;
+                document.getElementById('topRadius').value = 42;
+                document.getElementById('wallThickness').value = 2.2;
+                document.getElementById('profileType').value = 'bulb';
+                document.getElementById('bulge').value = 20;
+                document.getElementById('patternType').value = 'smooth';
+                document.getElementById('ribDepth').value = 0;
+                document.getElementById('twist').value = 0;
+                document.getElementById('voronoiToggle').checked = true;
+                document.getElementById('voronoiCount').value = 38;
+                document.getElementById('voronoiScale').value = 0.65;
+                document.getElementById('voronoiSeed').value = 42;
+                document.getElementById('voronoiMargin').value = 16;
+                setFilamentColor('#f59e0b');
+                if (detVor) detVor.open = true;
+            }
+            updateBezierUI();
+            requestRebuild(false);
+        };
+
+        // --- Binary STL Exporter (Z-Up Orientation for Slicers) ---
+        document.getElementById('exportBtn').addEventListener('click', () => {
+            if (!shadeMesh) return;
+            const params = getParams();
+            const exporter = new STLExporter();
+            const exportMesh = shadeMesh.clone();
+            exportMesh.geometry = shadeMesh.geometry.clone();
+
+            // Convert Three.js Y-up to 3D Slicer Z-up standard
+            exportMesh.geometry.rotateX(Math.PI / 2);
+
+            const result = exporter.parse(exportMesh, { binary: true });
+            exportMesh.geometry.dispose();
+
+            const buffer = result.buffer ? result.buffer : result;
+            const blob = new Blob([buffer], { type: 'application/octet-stream' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            const prefix = params.voronoiEnabled ? "LuminaPrint_Voronoi" : `LuminaPrint_${params.profileType}`;
+            link.download = `${prefix}_H${params.height}mm.stl`;
+            link.click();
+            setTimeout(() => {
+                URL.revokeObjectURL(link.href);
+            }, 1000);
+        });
+
+        // Preset Button Listeners
+        document.querySelectorAll('[data-preset]').forEach(btn => {
+            btn.addEventListener('click', () => {
+                applyPreset(btn.dataset.preset);
+            });
+        });
+
+        // --- Mobile View Mode Switching & Responsive Adaptations ---
+        const mobileTabPreview = document.getElementById('mobileTabPreview');
+        const mobileTabParams = document.getElementById('mobileTabParams');
+        const sidebarPanel = document.getElementById('sidebarPanel');
+        const viewportPanel = document.getElementById('viewportPanel');
+        const btnMobileJumpTo3D = document.getElementById('btnMobileJumpTo3D');
+        const btnMobileOpenParams = document.getElementById('btnMobileOpenParams');
+        const btnMobileExport = document.getElementById('btnMobileExport');
+
+        function resizeRenderer() {
+            if (!container || !renderer || !camera) return;
+            if (window.innerWidth >= 768) {
+                // Ensure tablet and desktop always display both panels
+                sidebarPanel.classList.remove('hidden');
+                sidebarPanel.classList.add('flex');
+                viewportPanel.classList.remove('hidden');
+                viewportPanel.classList.add('flex');
+            }
+            const width = container.clientWidth;
+            const height = container.clientHeight || 1;
+            if (width === 0 || height === 0) return;
+            camera.aspect = width / height;
+            camera.updateProjectionMatrix();
+            renderer.setSize(width, height);
+        }
+
+        function setMobileView(view) {
+            if (window.innerWidth >= 768) {
+                sidebarPanel.classList.remove('hidden');
+                sidebarPanel.classList.add('flex');
+                viewportPanel.classList.remove('hidden');
+                viewportPanel.classList.add('flex');
+                return;
+            }
+
+            if (view === 'params') {
+                sidebarPanel.classList.remove('hidden');
+                sidebarPanel.classList.add('flex');
+                viewportPanel.classList.add('hidden');
+                viewportPanel.classList.remove('flex');
+
+                if (mobileTabParams) mobileTabParams.className = "px-3 py-1.5 rounded-md transition flex items-center gap-1.5 font-semibold bg-amber-500 text-slate-950 shadow-sm";
+                if (mobileTabPreview) mobileTabPreview.className = "px-3 py-1.5 rounded-md transition flex items-center gap-1.5 text-slate-400 hover:text-slate-200";
+            } else {
+                // 3D Viewport mode
+                sidebarPanel.classList.add('hidden');
+                sidebarPanel.classList.remove('flex');
+                viewportPanel.classList.remove('hidden');
+                viewportPanel.classList.add('flex');
+
+                if (mobileTabPreview) mobileTabPreview.className = "px-3 py-1.5 rounded-md transition flex items-center gap-1.5 font-semibold bg-amber-500 text-slate-950 shadow-sm";
+                if (mobileTabParams) mobileTabParams.className = "px-3 py-1.5 rounded-md transition flex items-center gap-1.5 text-slate-400 hover:text-slate-200";
+
+                // Allow DOM reflow then recalculate canvas dimensions
+                requestAnimationFrame(() => {
+                    resizeRenderer();
+                });
+            }
+        }
+
+        if (mobileTabPreview) mobileTabPreview.addEventListener('click', () => setMobileView('preview'));
+        if (mobileTabParams) mobileTabParams.addEventListener('click', () => setMobileView('params'));
+        if (btnMobileJumpTo3D) btnMobileJumpTo3D.addEventListener('click', () => setMobileView('preview'));
+        if (btnMobileOpenParams) btnMobileOpenParams.addEventListener('click', () => setMobileView('params'));
+        if (btnMobileExport) {
+            btnMobileExport.addEventListener('click', () => {
+                const btn = document.getElementById('exportBtn');
+                if (btn) btn.click();
+            });
+        }
+
+        // Window & Container Resize Observers
+        window.addEventListener('resize', resizeRenderer);
+        if (window.ResizeObserver && container) {
+            const ro = new ResizeObserver(() => {
+                resizeRenderer();
+            });
+            ro.observe(container);
+        }
+
+        // Initial Build and Animation Loop
+        updateBezierUI();
+        rebuildLamp();
+
+        function animate() {
+            requestAnimationFrame(animate);
+            if (!renderer || !controls) return;
+            // On mobile devices, skip render passes if viewport is currently hidden to save battery & GPU
+            if (viewportPanel && viewportPanel.classList.contains('hidden')) return;
+            controls.update();
+            renderer.render(scene, camera);
+        }
+        animate();
+    </script>
+</body>
+
+</html>
