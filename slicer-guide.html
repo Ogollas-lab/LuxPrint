@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#0b0d10">
+  <meta name="description" content="Prepare a LuminaPrint STL in your slicer: import, orient, inspect, tune print settings, and preview before printing.">
+  <title>Slicer Guide | LuminaPrint 3D</title>
+  <link rel="stylesheet" href="./site-pages.css">
+  <script src="./site-nav.js" defer></script>
+</head>
+<body>
+  <header class="page-header" data-page-navigation>
+    <div class="page-container">
+      <nav class="page-nav" aria-label="Main navigation">
+        <a class="page-brand" href="./index.html"><span class="page-brand-mark" aria-hidden="true"></span>LuminaPrint 3D</a>
+        <div class="page-links">
+          <a href="./index.html">Overview</a><a href="./features.html">Core Features</a><a href="./gallery.html">Design Gallery</a><a href="./how-it-works.html">How It Works</a><a href="./slicer-guide.html" aria-current="page">Slicer Guide</a><a href="./faq.html">FAQ</a>
+        </div>
+        <a class="page-studio-link" href="./studio.html">Open Design Studio</a>
+        <button class="page-menu-toggle" data-menu-toggle type="button" aria-label="Open navigation menu" aria-expanded="false" aria-controls="mobile-navigation">☰</button>
+      </nav>
+      <div class="page-mobile-links" data-mobile-menu id="mobile-navigation">
+        <a href="./index.html">Overview</a><a href="./features.html">Core Features</a><a href="./gallery.html">Design Gallery</a><a href="./how-it-works.html">How It Works</a><a href="./slicer-guide.html" aria-current="page">Slicer Guide</a><a href="./faq.html">FAQ</a><a href="./studio.html">Open Design Studio</a>
+      </div>
+    </div>
+  </header>
+  <main>
+    <section class="page-hero">
+      <div class="page-container">
+        <span class="page-eyebrow">From STL to a print-ready plan</span>
+        <h1 class="page-title">A careful slicer workflow.</h1>
+        <p class="page-intro">Use this checklist to inspect a LuminaPrint export in Cura, PrusaSlicer, Bambu Studio, or another slicer compatible with STL files. Exact settings depend on your printer, material, and design.</p>
+      </div>
+    </section>
+    <section class="page-content page-container" aria-label="Slicer preparation steps">
+      <div class="workflow">
+        <article class="workflow-step"><div><h2>Export and import the STL</h2><p>Download the model from the design studio, then open or import the STL in your slicer. Keep the original file so you can return to it if you change the design.</p></div></article>
+        <article class="workflow-step"><div><h2>Check orientation and scale</h2><p>Confirm the model is upright, sits on the build plate as intended, and has the expected dimensions. Do not rely on automatic scaling without checking the displayed measurements.</p></div></article>
+        <article class="workflow-step"><div><h2>Inspect the model</h2><p>Review the model from several angles and use your slicer's repair or mesh analysis tools if it reports errors. Examine thin walls, openings, rims, and mounting features closely.</p></div></article>
+        <article class="workflow-step"><div><h2>Choose printer-specific settings</h2><p>Start with a profile you already trust for your printer and material. A 0.4 mm nozzle is a common starting point; choose wall count, layer height, and temperatures based on the filament and the shade's wall thickness.</p></div></article>
+        <article class="workflow-step"><div><h2>Preview every layer</h2><p>Slice the model, then inspect the layer preview for gaps, unsupported regions, unexpected infill, or missing walls. Supports and vase mode depend on the geometry and selected design mode—verify the preview before printing.</p></div></article>
+        <article class="workflow-step"><div><h2>Print safely</h2><p>Use a suitable 3D-printing filament and follow its manufacturer's guidance. Printed plastic can soften or ignite near hot bulbs: use a cool-running LED, keep it clear of the shade, and never leave a lit print unattended.</p></div></article>
+      </div>
+      <p class="guide-note"><strong>Important:</strong> These are general inspection steps, not universal print settings or a guarantee that a model is compatible with every printer. Follow your printer and filament manufacturers' instructions.</p>
+      <a class="page-action" href="./studio.html">Open the Design Studio</a>
+    </section>
+  </main>
+  <footer class="page-footer"><div class="page-container page-footer-row"><span>LuminaPrint 3D · Parametric lighting design</span><div class="page-footer-links"><a href="./index.html">Overview</a><a href="./features.html">Core Features</a><a href="./gallery.html">Design Gallery</a><a href="./how-it-works.html">How It Works</a><a href="./faq.html">FAQ</a></div></div></footer>
+</body>
+</html>

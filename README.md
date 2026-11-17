@@ -65,14 +65,15 @@
 ### Pages & Studio
 The public site is split into focused pages that share the same branding and navigation:
 
-- `/` or `/index.html` — product introduction and links to the dedicated information pages.
-- `/features.html` — capabilities available in the CAD studio.
+- `/` or `/index.html` — the project overview.
+- `/features.html` — core capabilities available in the CAD studio.
 - `/how-it-works.html` — the five-step design and export workflow.
 - `/gallery.html` — illustrative design directions (not built-in presets).
+- `/slicer-guide.html` — general steps for importing and inspecting an STL in a slicer.
 - `/faq.html` — product and 3D-printing workflow answers.
 - `/studio.html` — the full interactive CAD studio.
 
-The informational pages use the shared `site-pages.css` styling and `site-nav.js` mobile navigation. Each page contains only the content for its own purpose.
+The informational pages use the shared `site-pages.css` styling and `site-nav.js` mobile navigation. Vercel is configured to serve the project root as the static output directory, with clean URLs enabled.
 
 ### Live site
 Open the public homepage:
@@ -106,13 +107,13 @@ Open **[http://localhost:3000](http://localhost:3000)** in your browser.
 
 | Parameter | Recommended Setting |
 | :--- | :--- |
-| **Material** | **PLA, PETG, or Translucent PETG** (White / Natural yields best light diffusion). |
-| **Nozzle Size** | 0.4 mm or 0.6 mm (0.6 mm produces durable lamp shades faster). |
-| **Infill** | **0%** (Lampshades diffuse light best through hollow perimeters). |
-| **Wall Perimeters** | **2–3 perimeters** for standard shades; **3–4 perimeters** for Voronoi cutouts. |
-| **Supports** | **None** (Voronoi cell angles and rib overhangs are engineered for self-supporting bridges). |
-| **Spiral Vase Mode** | When selecting *Solid Base* mode, enable **Spiralize Outer Contour** (Cura) or **Spiral Vase** (PrusaSlicer/Bambu Studio/OrcaSlicer). |
-| **Safety Note** | Always use **cool LED bulbs** (max 5W–9W LED) to avoid heat deformation of printed plastics. |
+| **Material and temperatures** | Choose a material and temperatures supported by your printer and follow the filament manufacturer's guidance. |
+| **Nozzle and wall settings** | Use a trusted profile for your printer; inspect the sliced walls against the exported model's dimensions. |
+| **Infill and supports** | Check the slicer preview for the selected design. These settings depend on the geometry and are not universally fixed. |
+| **Vase mode** | Use only when the selected design mode and the slicer's preview support it. |
+| **Lighting safety** | Printed plastic can deform or ignite near heat. Use only a cool-running LED, keep it clear of the shade, and never leave it unattended. |
+
+These are inspection reminders, not validated settings for every printer or design. See the [Slicer Guide](./slicer-guide.html) and verify the sliced preview before printing.
 
 ---
 
@@ -124,6 +125,7 @@ LuxPrint/
 ├── features.html         # Dedicated feature overview
 ├── how-it-works.html     # Design workflow walkthrough
 ├── gallery.html          # Illustrative design gallery
+├── slicer-guide.html     # Slicer preparation guide
 ├── faq.html              # Product FAQ
 ├── site-pages.css        # Shared informational-page styling
 ├── site-nav.js           # Shared responsive page navigation
