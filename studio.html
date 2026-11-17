@@ -27,10 +27,6 @@
             -webkit-tap-highlight-color: transparent;
         }
 
-        button, a, summary, label, select, input[type="color"] {
-            touch-action: manipulation;
-        }
-
         #canvasContainer canvas {
             touch-action: none;
             display: block;
@@ -181,16 +177,18 @@
 
     <!-- Mobile Top Header & Navigation Switcher (< md screens) -->
     <header class="md:hidden flex items-center justify-between bg-slate-900/95 backdrop-blur-md border-b border-slate-800 px-3 py-2 z-30 shrink-0">
-        <div class="flex items-center gap-2">
-            <a href="./index.html" aria-label="LuminaPrint 3D home" class="flex items-center gap-2">
-                <svg class="w-5 h-5 text-amber-400 shrink-0" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M12 2a7 7 0 0 0-7 7c0 2.38 1.19 4.47 3 5.74V17a2 2 0 0 0 2 2h4a2 2 0 0 0 2-2v-2.26c1.81-1.27 3-3.36 3-5.74a7 7 0 0 0-7-7M9 21a1 1 0 0 0 1 1h4a1 1 0 0 0 1-1v-1H9z" />
-                </svg>
-                <div>
-                    <h1 class="text-sm font-bold text-amber-400 tracking-tight leading-none">LuminaPrint 3D</h1>
-                    <span class="text-[10px] text-slate-400 font-mono">mm units</span>
-                </div>
-            </a>
+        <a href="index.html" class="flex items-center gap-2 group" title="Return to Homepage & Gallery">
+            <svg class="w-5 h-5 text-amber-400 shrink-0 group-hover:scale-110 transition-transform" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 2a7 7 0 0 0-7 7c0 2.38 1.19 4.47 3 5.74V17a2 2 0 0 0 2 2h4a2 2 0 0 0 2-2v-2.26c1.81-1.27 3-3.36 3-5.74a7 7 0 0 0-7-7M9 21a1 1 0 0 0 1 1h4a1 1 0 0 0 1-1v-1H9z" />
+            </svg>
+            <div>
+                <h1 class="text-sm font-bold text-amber-400 tracking-tight leading-none flex items-center gap-1">
+                    LuminaPrint 3D
+                    <span class="text-[9px] text-slate-500 font-normal">← Home</span>
+                </h1>
+                <span class="text-[10px] text-slate-400 font-mono">mm units</span>
+            </div>
+        </a>
 
         <!-- Mobile View Mode Segmented Switcher -->
         <div class="flex bg-slate-950 rounded-lg p-0.5 border border-slate-800 text-xs font-medium">
@@ -223,21 +221,29 @@
         <!-- Desktop / Tablet Header -->
         <div class="hidden md:flex p-4 border-b border-slate-800 items-center justify-between bg-slate-950/40">
             <div>
-                <h1 class="text-lg font-bold text-amber-400 tracking-wide flex items-center gap-2">
-                    <a href="./index.html" aria-label="LuminaPrint 3D home" class="flex items-center gap-2">
-                        <svg class="w-5 h-5 text-amber-400" viewBox="0 0 24 24" fill="currentColor">
-                            <path
-                                d="M12 2a7 7 0 0 0-7 7c0 2.38 1.19 4.47 3 5.74V17a2 2 0 0 0 2 2h4a2 2 0 0 0 2-2v-2.26c1.81-1.27 3-3.36 3-5.74a7 7 0 0 0-7-7M9 21a1 1 0 0 0 1 1h4a1 1 0 0 0 1-1v-1H9z" />
-                        </svg>
-                        LuminaPrint 3D
-                    </a>
-                </h1>
+                <a href="index.html" class="flex items-center gap-2 group hover:opacity-90 transition">
+                    <svg class="w-5 h-5 text-amber-400 group-hover:scale-110 transition-transform" viewBox="0 0 24 24" fill="currentColor">
+                        <path
+                            d="M12 2a7 7 0 0 0-7 7c0 2.38 1.19 4.47 3 5.74V17a2 2 0 0 0 2 2h4a2 2 0 0 0 2-2v-2.26c1.81-1.27 3-3.36 3-5.74a7 7 0 0 0-7-7M9 21a1 1 0 0 0 1 1h4a1 1 0 0 0 1-1v-1H9z" />
+                    </svg>
+                    <h1 class="text-lg font-bold text-amber-400 tracking-wide">LuminaPrint 3D</h1>
+                </a>
                 <p class="text-xs text-slate-400">Parametric CAD & Cellular Voronoi Cutouts</p>
             </div>
-            <span
-                class="text-xs bg-amber-500/10 text-amber-400 border border-amber-500/30 px-2.5 py-1 rounded-full font-mono font-medium">
-                mm units
-            </span>
+            <div class="flex items-center gap-2">
+                <a href="index.html"
+                    class="text-xs text-slate-400 hover:text-amber-300 flex items-center gap-1 bg-slate-950/80 hover:bg-slate-800 border border-slate-800 hover:border-slate-700 px-2.5 py-1 rounded-lg transition"
+                    title="Return to Homepage & Gallery">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                    </svg>
+                    <span>Home</span>
+                </a>
+                <span
+                    class="text-xs bg-amber-500/10 text-amber-400 border border-amber-500/30 px-2 py-0.5 rounded-full font-mono font-medium">
+                    mm
+                </span>
+            </div>
         </div>
 
         <!-- Scrollable Controls List -->

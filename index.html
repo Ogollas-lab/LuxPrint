@@ -1,94 +1,1322 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="scroll-smooth">
+
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="theme-color" content="#0b0d10">
-  <meta name="description" content="Meet LuminaPrint 3D, a browser-based parametric design studio for custom 3D-printable lamp shades and lanterns.">
-  <title>LuminaPrint 3D | Design light in your browser</title>
-  <link rel="stylesheet" href="./site-pages.css">
-  <script src="./site-nav.js" defer></script>
-  <style>
-    .home-hero-grid { display: grid; grid-template-columns: 1.05fr .95fr; align-items: center; gap: clamp(2rem, 6vw, 5rem); }
-    .home-title { max-width: 720px; margin: .9rem 0 1.1rem; font-size: clamp(3rem, 7.5vw, 6.4rem); line-height: .94; letter-spacing: -.07em; }
-    .home-title em { color: #f5bd55; font-style: normal; }
-    .home-intro { max-width: 640px; margin: 0; color: var(--page-muted); font-size: clamp(1.05rem, 2vw, 1.2rem); line-height: 1.75; }
-    .home-actions { display: flex; flex-wrap: wrap; gap: .75rem; margin-top: 1.6rem; }
-    .home-actions .page-action { margin: 0; }
-    .home-secondary { display: inline-flex; align-items: center; justify-content: center; min-height: 46px; padding: .7rem 1.15rem; border: 1px solid var(--page-line); border-radius: 999px; color: var(--page-text); font-weight: 700; }
-    .home-highlights { display: flex; flex-wrap: wrap; gap: .65rem; margin-top: 1.45rem; color: #c6ced8; font-size: .85rem; }
-    .home-highlights span { border: 1px solid var(--page-line); border-radius: 999px; padding: .45rem .7rem; background: rgba(17, 23, 29, .64); }
-    .home-lamp-stage { min-height: 410px; position: relative; display: grid; place-items: center; border: 1px solid var(--page-line); border-radius: 28px; overflow: hidden; background: radial-gradient(ellipse at 50% 63%, rgba(245, 158, 11, .16), transparent 49%), linear-gradient(145deg, #151b20, #0b0e12); }
-    .home-lamp { position: relative; width: min(45%, 180px); height: 245px; border: 2px solid rgba(255, 223, 163, .8); border-radius: 48% 48% 25% 25% / 18% 18% 10% 10%; background: repeating-linear-gradient(90deg, transparent 0 9px, rgba(255, 217, 143, .48) 10px 12px), linear-gradient(180deg, rgba(245, 158, 11, .12), rgba(15, 20, 25, .6)); box-shadow: inset 0 0 34px rgba(245, 158, 11, .22), 0 0 70px rgba(245, 158, 11, .12); }
-    .home-lamp::before { content: ""; position: absolute; inset: 14% 12%; border-radius: inherit; background: radial-gradient(ellipse, rgba(255, 207, 123, .32), transparent 65%); }
-    .home-lamp::after { content: ""; position: absolute; left: 50%; top: 100%; width: 7px; height: 72px; background: linear-gradient(#d49b44, #6e5128); transform: translateX(-50%); }
-    .home-lamp-base { position: absolute; left: 50%; top: calc(50% + 140px); width: 112px; height: 17px; border: 1px solid rgba(255, 223, 163, .42); border-radius: 50%; background: linear-gradient(#66502e, #25221c); transform: translateX(-50%); }
-    .home-lamp-label { position: absolute; right: 1rem; bottom: 1rem; color: #d3dae2; font-size: .78rem; letter-spacing: .04em; }
-    .home-section { padding: 1rem 0 4rem; }
-    .home-section-head { margin: 0 0 1.25rem; }
-    .home-section-head h2 { margin: .6rem 0 0; font-size: clamp(1.7rem, 4vw, 2.6rem); letter-spacing: -.045em; }
-    .home-section-head p { max-width: 720px; margin: .65rem 0 0; color: var(--page-muted); line-height: 1.75; }
-    .home-overview { margin-bottom: 3.5rem; }
-    @media (max-width: 760px) {
-      .home-hero-grid { grid-template-columns: 1fr; }
-      .home-lamp-stage { min-height: 330px; }
-      .home-lamp { height: 205px; }
-      .home-lamp-base { top: calc(50% + 118px); }
-      .home-title { font-size: clamp(2.8rem, 13vw, 4.7rem); }
-      .home-actions { display: grid; }
-    }
-  </style>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <title>LuminaPrint 3D — Parametric Lamp Shade Generator & Digital Manufacturing Studio</title>
+    <meta name="description"
+        content="Design Light. Shape Geometry. Create Something Extraordinary. Transform your creative ideas into custom 3D-printable lamp shades and lanterns using an interactive parametric CAD studio." />
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        slate: {
+                            950: '#070b14',
+                            900: '#0b1120',
+                            850: '#10172a',
+                            800: '#1e293b',
+                        },
+                        amber: {
+                            450: '#f59e0b',
+                            550: '#d97706',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['system-ui', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
+                        mono: ['ui-monospace', 'SFMono-Regular', 'Menlo', 'Monaco', 'Consolas', 'monospace']
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        /* Smooth scrolling and prevent unwanted horizontal overflow */
+        html,
+        body {
+            max-width: 100vw;
+            overflow-x: hidden;
+            background-color: #070b14;
+            color: #f8fafc;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #070b14;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #1e293b;
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #334155;
+        }
+
+        /* Hero Background with High-End Lighting Gradient */
+        .hero-banner {
+            background-image: 
+                linear-gradient(to right, rgba(7, 11, 20, 0.96) 0%, rgba(7, 11, 20, 0.82) 42%, rgba(7, 11, 20, 0.38) 75%, rgba(7, 11, 20, 0.85) 100%),
+                linear-gradient(to top, rgba(7, 11, 20, 1) 0%, rgba(7, 11, 20, 0) 35%),
+                url('public/images/luminaprint/hero-diamond-lantern.png');
+            background-size: cover;
+            background-position: right 25% center;
+            background-repeat: no-repeat;
+        }
+
+        @media (max-width: 768px) {
+            .hero-banner {
+                background-image: 
+                    linear-gradient(to bottom, rgba(7, 11, 20, 0.92) 0%, rgba(7, 11, 20, 0.78) 50%, rgba(7, 11, 20, 0.96) 100%),
+                    url('public/images/luminaprint/hero-diamond-lantern.png');
+                background-position: center top;
+            }
+        }
+
+        /* Call To Action Promotional Background */
+        .cta-banner {
+            background-image: 
+                radial-gradient(circle at center, rgba(7, 11, 20, 0.72) 0%, rgba(7, 11, 20, 0.96) 80%),
+                url('public/images/luminaprint/hero-faceted-globe.png');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+        }
+
+        /* Card Image Zoom Transition */
+        .gallery-card img {
+            transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .gallery-card:hover img {
+            transform: scale(1.06);
+        }
+
+        /* Subtle Glow Effects */
+        .glow-amber {
+            box-shadow: 0 0 35px -5px rgba(245, 158, 11, 0.25);
+        }
+
+        .glow-amber-lg {
+            box-shadow: 0 0 60px -10px rgba(245, 158, 11, 0.35);
+        }
+    </style>
 </head>
-<body>
-  <header class="page-header" data-page-navigation>
-    <div class="page-container">
-      <nav class="page-nav" aria-label="Main navigation">
-        <a class="page-brand" href="./index.html"><span class="page-brand-mark" aria-hidden="true"></span>LuminaPrint 3D</a>
-        <div class="page-links">
-          <a href="./index.html" aria-current="page">Home</a><a href="./features.html">Features</a><a href="./how-it-works.html">How It Works</a><a href="./gallery.html">Design Gallery</a><a href="./faq.html">FAQ</a>
+
+<body class="bg-slate-950 text-slate-100 font-sans antialiased selection:bg-amber-500 selection:text-slate-950">
+
+    <!-- Top Sticky Navigation Bar -->
+    <header class="sticky top-0 z-50 bg-slate-950/85 backdrop-blur-md border-b border-slate-800/80 px-4 sm:px-8 py-3.5 transition-all">
+        <div class="max-w-7xl mx-auto flex items-center justify-between gap-4">
+            <!-- Brand Logo -->
+            <a href="index.html" class="flex items-center gap-2.5 group">
+                <div class="w-9 h-9 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 group-hover:bg-amber-500 group-hover:text-slate-950 transition-all duration-300">
+                    <svg class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12 2a7 7 0 0 0-7 7c0 2.38 1.19 4.47 3 5.74V17a2 2 0 0 0 2 2h4a2 2 0 0 0 2-2v-2.26c1.81-1.27 3-3.36 3-5.74a7 7 0 0 0-7-7M9 21a1 1 0 0 0 1 1h4a1 1 0 0 0 1-1v-1H9z" />
+                    </svg>
+                </div>
+                <div>
+                    <span class="text-base sm:text-lg font-bold text-white tracking-tight flex items-center gap-1.5">
+                        LuminaPrint <span class="text-amber-400">3D</span>
+                    </span>
+                    <span class="hidden sm:block text-[10px] text-slate-400 tracking-wider uppercase font-mono leading-none">Computational Lighting CAD</span>
+                </div>
+            </a>
+
+            <!-- Desktop Navigation Links -->
+            <nav class="hidden md:flex items-center gap-7 text-xs font-medium text-slate-300">
+                <a href="#what-is-it" class="hover:text-amber-400 transition">Overview</a>
+                <a href="#features" class="hover:text-amber-400 transition">Core Features</a>
+                <a href="#gallery" class="hover:text-amber-400 transition">Design Gallery</a>
+                <a href="#how-it-works" class="hover:text-amber-400 transition">How It Works</a>
+                <a href="#slicer-guide" class="hover:text-amber-400 transition">Slicer Guide</a>
+            </nav>
+
+            <!-- Action CTAs -->
+            <div class="flex items-center gap-3">
+                <a href="lampshade_studio.html"
+                    class="bg-amber-500 hover:bg-amber-400 active:bg-amber-600 text-slate-950 font-bold px-4 py-2 sm:px-5 sm:py-2.5 rounded-xl shadow-lg shadow-amber-500/20 text-xs sm:text-sm flex items-center gap-2 transition duration-200">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M14 10l-2 1m0 0l-2-1m2 1v2.5M20 7l-2 1m2-1l-2-1m2 1v2.5M14 4l-2-1-2 1M4 7l2-1M4 7l2 1M4 7v2.5M12 21l-2-1m2 1l2-1m-2 1v-2.5M6 18l-2-1v-2.5M18 18l2-1v-2.5" />
+                    </svg>
+                    <span>Open 3D Studio</span>
+                </a>
+            </div>
         </div>
-        <a class="page-studio-link" href="./studio.html">Open Design Studio</a>
-        <button class="page-menu-toggle" data-menu-toggle type="button" aria-label="Open navigation menu" aria-expanded="false" aria-controls="mobile-navigation">☰</button>
-      </nav>
-      <div class="page-mobile-links" data-mobile-menu id="mobile-navigation">
-        <a href="./index.html" aria-current="page">Home</a><a href="./features.html">Features</a><a href="./how-it-works.html">How It Works</a><a href="./gallery.html">Design Gallery</a><a href="./faq.html">FAQ</a><a href="./studio.html">Open Design Studio</a>
-      </div>
+    </header>
+
+    <!-- 1. Hero Section -->
+    <section class="relative hero-banner min-h-[85vh] lg:min-h-[90vh] flex items-center border-b border-slate-800/80">
+        <div class="max-w-7xl mx-auto px-4 sm:px-8 py-16 sm:py-24 w-full">
+            <div class="max-w-2xl">
+                <!-- Eyebrow Badge -->
+                <div class="inline-flex items-center gap-2 bg-slate-900/90 border border-amber-500/30 px-3.5 py-1.5 rounded-full text-xs text-amber-300 font-medium mb-6 backdrop-blur-md shadow-sm">
+                    <span class="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span>
+                    <span>Zero-Install Browser Parametric CAD</span>
+                </div>
+
+                <!-- Main Headline -->
+                <h1 class="text-3xl sm:text-5xl lg:text-6xl font-extrabold text-white tracking-tight leading-[1.1] mb-6">
+                    Design Light. <br />
+                    <span class="text-transparent bg-clip-text bg-gradient-to-r from-amber-200 via-amber-400 to-amber-500">Shape Geometry.</span> <br />
+                    Create Something Extraordinary.
+                </h1>
+
+                <!-- Supporting Text -->
+                <p class="text-base sm:text-lg text-slate-300 leading-relaxed mb-8 max-w-xl">
+                    Transform your creative ideas into custom 3D-printable lamp shades and lanterns using an interactive parametric CAD studio.
+                </p>
+
+                <!-- CTA Buttons -->
+                <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3.5 sm:gap-4 mb-10">
+                    <a href="lampshade_studio.html"
+                        class="bg-amber-500 hover:bg-amber-400 active:bg-amber-600 text-slate-950 font-bold px-7 py-3.5 rounded-xl shadow-xl shadow-amber-500/25 text-sm sm:text-base flex items-center justify-center gap-2.5 transition duration-200 glow-amber">
+                        <span>Start Designing</span>
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                        </svg>
+                    </a>
+
+                    <a href="#features"
+                        class="bg-slate-900/80 hover:bg-slate-800 text-slate-200 hover:text-white border border-slate-700/80 font-semibold px-6 py-3.5 rounded-xl text-sm sm:text-base flex items-center justify-center gap-2 backdrop-blur-md transition duration-200">
+                        <span>Explore Features</span>
+                        <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                        </svg>
+                    </a>
+                </div>
+
+                <!-- Trust / Capability Highlights -->
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-6 border-t border-slate-800/80 text-xs text-slate-400">
+                    <div>
+                        <span class="block font-bold text-white text-sm">Watertight</span>
+                        <span>100% Manifold STL</span>
+                    </div>
+                    <div>
+                        <span class="block font-bold text-white text-sm">Hardware Ready</span>
+                        <span>E27, E14 & Cord Grip</span>
+                    </div>
+                    <div>
+                        <span class="block font-bold text-white text-sm">Procedural</span>
+                        <span>Voronoi & Ribs CSG</span>
+                    </div>
+                    <div>
+                        <span class="block font-bold text-white text-sm">Slicer Aligned</span>
+                        <span>Z-Up Export Standard</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 2. What Is LuminaPrint Section -->
+    <section id="what-is-it" class="py-20 sm:py-28 bg-slate-950 relative border-b border-slate-800/80">
+        <div class="max-w-7xl mx-auto px-4 sm:px-8">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-center">
+                
+                <!-- Left Column: Story & Philosophy -->
+                <div class="lg:col-span-6 space-y-6">
+                    <div class="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-amber-400">
+                        <span class="w-6 h-px bg-amber-400"></span>
+                        <span>Computational Lighting Architecture</span>
+                    </div>
+                    <h2 class="text-3xl sm:text-4xl font-extrabold text-white tracking-tight leading-tight">
+                        Crafting Beautiful Light Through Mathematical Geometry
+                    </h2>
+                    <p class="text-sm sm:text-base text-slate-300 leading-relaxed">
+                        LuminaPrint 3D eliminates the barrier between complex architectural CAD software and desktop 3D printing. Traditional modeling of organic Voronoi lattices, twisted fluting, and dual-wall mounting spiders can take hours of manual lofting and boolean operations.
+                    </p>
+                    <p class="text-sm sm:text-base text-slate-400 leading-relaxed">
+                        With our in-browser parametric studio, every radius, rib wave, helical twist, and cellular cutout updates instantly in real time. Download a guaranteed watertight binary <code class="text-amber-300 font-mono text-xs bg-slate-900 px-1.5 py-0.5 rounded border border-slate-800">.STL</code> file, drop it directly into your slicer, and print without support material.
+                    </p>
+
+                    <!-- Feature Bullet Points -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
+                        <div class="flex items-start gap-3 bg-slate-900/60 border border-slate-800/80 p-3.5 rounded-xl">
+                            <div class="w-6 h-6 rounded-lg bg-amber-500/10 text-amber-400 flex items-center justify-center shrink-0 mt-0.5">
+                                <svg class="w-3.5 h-3.5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+                            </div>
+                            <div>
+                                <h4 class="text-xs font-bold text-white">Translucent Light Diffusion</h4>
+                                <p class="text-[11px] text-slate-400">Engineered wall thickness (1.0–5.0mm) for optimal light dispersion.</p>
+                            </div>
+                        </div>
+
+                        <div class="flex items-start gap-3 bg-slate-900/60 border border-slate-800/80 p-3.5 rounded-xl">
+                            <div class="w-6 h-6 rounded-lg bg-amber-500/10 text-amber-400 flex items-center justify-center shrink-0 mt-0.5">
+                                <svg class="w-3.5 h-3.5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+                            </div>
+                            <div>
+                                <h4 class="text-xs font-bold text-white">Self-Supporting Overhangs</h4>
+                                <p class="text-[11px] text-slate-400">Sloped cellular geometry designed for 0% support printing.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Column: Featured Product Visual & Comparison -->
+                <div class="lg:col-span-6 space-y-5">
+                    <!-- Main Lifestyle Image Showcase -->
+                    <div class="relative group rounded-2xl overflow-hidden border border-slate-800 bg-slate-900 shadow-2xl">
+                        <img src="public/images/luminaprint/lifestyle-helical-lamp.png"
+                            alt="Illuminated 3D-printed helical table lamp in contemporary living room"
+                            loading="lazy"
+                            class="w-full h-80 sm:h-96 object-cover object-center group-hover:scale-105 transition-transform duration-700" />
+                        <div class="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/20 to-transparent"></div>
+                        <div class="absolute bottom-4 left-4 right-4 flex items-center justify-between text-xs">
+                            <div class="bg-slate-950/80 backdrop-blur-md px-3 py-1.5 rounded-lg border border-slate-800 text-slate-200">
+                                <span class="font-bold text-amber-400">Helical S-Rib Shade</span> in Natural PLA
+                            </div>
+                            <span class="text-[11px] text-slate-400 bg-slate-900/80 px-2 py-1 rounded border border-slate-800 font-mono">0% Infill Print</span>
+                        </div>
+                    </div>
+
+                    <!-- Lit vs Unlit Comparison Card -->
+                    <div class="bg-slate-900/60 border border-slate-800 p-4 rounded-xl flex items-center gap-4">
+                        <img src="public/images/luminaprint/lamp-lit-unlit-comparison.png"
+                            alt="Side-by-side comparison of 3D printed lamp shade unlit by day and lit by night"
+                            loading="lazy"
+                            class="w-24 h-16 sm:w-32 sm:h-20 object-cover rounded-lg border border-slate-800 shrink-0" />
+                        <div>
+                            <h4 class="text-xs sm:text-sm font-bold text-white mb-0.5">Dual-State Visual Presence</h4>
+                            <p class="text-xs text-slate-400">
+                                A sculptural matte ceramic silhouette by day; a warm, radiating amber luminaire by night.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- 3. Core Features Section -->
+    <section id="features" class="py-20 sm:py-28 bg-slate-900/50 relative border-b border-slate-800/80">
+        <div class="max-w-7xl mx-auto px-4 sm:px-8">
+            <!-- Section Header -->
+            <div class="text-center max-w-2xl mx-auto mb-16">
+                <div class="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-amber-400 mb-3">
+                    <span>Parametric Capabilities</span>
+                </div>
+                <h2 class="text-3xl sm:text-4xl font-extrabold text-white tracking-tight mb-4">
+                    Engineered for Complete Geometric Freedom
+                </h2>
+                <p class="text-sm sm:text-base text-slate-400">
+                    Every feature in LuminaPrint 3D is backed by real mathematical modeling algorithms running client-side in WebGL and Three.js.
+                </p>
+            </div>
+
+            <!-- Features Grid (6 Core Features with matching real images) -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
+
+                <!-- Feature 1: Sinusoidal Ribs & Helical Waves -->
+                <div class="group bg-slate-900/90 border border-slate-800 rounded-2xl overflow-hidden hover:border-amber-500/50 transition-all duration-300 shadow-xl flex flex-col">
+                    <div class="relative h-60 overflow-hidden bg-slate-950">
+                        <img src="public/images/luminaprint/ribbed-sinusoidal-glow.png"
+                            alt="Close-up of 3D printed sinusoidal ribs illuminating with warm light"
+                            loading="lazy"
+                            class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                        <span class="absolute top-3 left-3 bg-slate-950/80 backdrop-blur-md text-[10px] text-amber-400 font-mono px-2.5 py-1 rounded-md border border-slate-800">
+                            Pattern 01
+                        </span>
+                    </div>
+                    <div class="p-6 flex-1 flex flex-col justify-between">
+                        <div>
+                            <h3 class="text-base font-bold text-white mb-2">Sinusoidal Ribs & Helical Waves</h3>
+                            <p class="text-xs text-slate-400 leading-relaxed mb-4">
+                                Soft fluting modulated by mathematical harmonic sine waves. Tune rib count from 3 to 80, rib depth up to 25mm, and twist up to 360° for sweeping helical profiles.
+                            </p>
+                        </div>
+                        <div class="pt-3 border-t border-slate-800/80 flex items-center justify-between text-xs">
+                            <span class="text-slate-400 font-mono text-[11px]">Ribs: 3–80 | Twist: ±360°</span>
+                            <a href="lampshade_studio.html" class="text-amber-400 hover:text-amber-300 font-medium inline-flex items-center gap-1">
+                                <span>Try in Studio</span> &rarr;
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Feature 2: Voronoi Cellular Cutouts -->
+                <div class="group bg-slate-900/90 border border-slate-800 rounded-2xl overflow-hidden hover:border-amber-500/50 transition-all duration-300 shadow-xl flex flex-col">
+                    <div class="relative h-60 overflow-hidden bg-slate-950">
+                        <img src="public/images/luminaprint/voronoi-cellular-pendant.png"
+                            alt="Voronoi cellular cutout cylindrical pendant lantern with warm light"
+                            loading="lazy"
+                            class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                        <span class="absolute top-3 left-3 bg-slate-950/80 backdrop-blur-md text-[10px] text-amber-400 font-mono px-2.5 py-1 rounded-md border border-slate-800">
+                            Pattern 02
+                        </span>
+                    </div>
+                    <div class="p-6 flex-1 flex flex-col justify-between">
+                        <div>
+                            <h3 class="text-base font-bold text-white mb-2">Voronoi / Cellular Cutouts (CSG)</h3>
+                            <p class="text-xs text-slate-400 leading-relaxed mb-4">
+                                Algorithmic 360° cylindrical Delaunay tessellation executed via solid boolean subtraction. Customize hole density, cell aperture scaling, and solid rim safety margins.
+                            </p>
+                        </div>
+                        <div class="pt-3 border-t border-slate-800/80 flex items-center justify-between text-xs">
+                            <span class="text-slate-400 font-mono text-[11px]">three-bvh-csg Engine</span>
+                            <a href="lampshade_studio.html" class="text-amber-400 hover:text-amber-300 font-medium inline-flex items-center gap-1">
+                                <span>Try in Studio</span> &rarr;
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Feature 3: Pleated Architectural Fins -->
+                <div class="group bg-slate-900/90 border border-slate-800 rounded-2xl overflow-hidden hover:border-amber-500/50 transition-all duration-300 shadow-xl flex flex-col">
+                    <div class="relative h-60 overflow-hidden bg-slate-950">
+                        <img src="public/images/luminaprint/pleated-fins-copper.png"
+                            alt="Copper terracotta pleated fin lampshade close-up showing architectural fluting"
+                            loading="lazy"
+                            class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                        <span class="absolute top-3 left-3 bg-slate-950/80 backdrop-blur-md text-[10px] text-amber-400 font-mono px-2.5 py-1 rounded-md border border-slate-800">
+                            Pattern 03
+                        </span>
+                    </div>
+                    <div class="p-6 flex-1 flex flex-col justify-between">
+                        <div>
+                            <h3 class="text-base font-bold text-white mb-2">Pleated Architectural Fins</h3>
+                            <p class="text-xs text-slate-400 leading-relaxed mb-4">
+                                Crisp, sharp triangular ridges providing structured directional light channeling and dramatic radial shadow projections across walls and ceilings.
+                            </p>
+                        </div>
+                        <div class="pt-3 border-t border-slate-800/80 flex items-center justify-between text-xs">
+                            <span class="text-slate-400 font-mono text-[11px]">Crisp Facets &amp; Edges</span>
+                            <a href="lampshade_studio.html" class="text-amber-400 hover:text-amber-300 font-medium inline-flex items-center gap-1">
+                                <span>Try in Studio</span> &rarr;
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Feature 4: Origami Knurling & Diamond Lattice -->
+                <div class="group bg-slate-900/90 border border-slate-800 rounded-2xl overflow-hidden hover:border-amber-500/50 transition-all duration-300 shadow-xl flex flex-col">
+                    <div class="relative h-60 overflow-hidden bg-slate-950">
+                        <img src="public/images/luminaprint/origami-knurl-black.png"
+                            alt="Black origami diamond knurl pendant lamp glowing with warm internal light"
+                            loading="lazy"
+                            class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                        <span class="absolute top-3 left-3 bg-slate-950/80 backdrop-blur-md text-[10px] text-amber-400 font-mono px-2.5 py-1 rounded-md border border-slate-800">
+                            Pattern 04
+                        </span>
+                    </div>
+                    <div class="p-6 flex-1 flex flex-col justify-between">
+                        <div>
+                            <h3 class="text-base font-bold text-white mb-2">Origami Knurl &amp; Diamond Lattice</h3>
+                            <p class="text-xs text-slate-400 leading-relaxed mb-4">
+                                Multi-faceted diamond relief scattering light prismatically. Overhang angles are calculated to bridge cleanly on standard FDM printers without supports.
+                            </p>
+                        </div>
+                        <div class="pt-3 border-t border-slate-800/80 flex items-center justify-between text-xs">
+                            <span class="text-slate-400 font-mono text-[11px]">Self-Bridging Faces</span>
+                            <a href="lampshade_studio.html" class="text-amber-400 hover:text-amber-300 font-medium inline-flex items-center gap-1">
+                                <span>Try in Studio</span> &rarr;
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Feature 5: Parametric 2D Bezier Sculpting -->
+                <div class="group bg-slate-900/90 border border-slate-800 rounded-2xl overflow-hidden hover:border-amber-500/50 transition-all duration-300 shadow-xl flex flex-col">
+                    <div class="relative h-60 overflow-hidden bg-slate-950">
+                        <img src="public/images/luminaprint/parametric-asymmetric-vase.png"
+                            alt="Terracotta 3D printed organic sculpted asymmetrical lampshade"
+                            loading="lazy"
+                            class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                        <span class="absolute top-3 left-3 bg-slate-950/80 backdrop-blur-md text-[10px] text-amber-400 font-mono px-2.5 py-1 rounded-md border border-slate-800">
+                            Geometry Control
+                        </span>
+                    </div>
+                    <div class="p-6 flex-1 flex flex-col justify-between">
+                        <div>
+                            <h3 class="text-base font-bold text-white mb-2">Interactive 2D Bezier Sculpting</h3>
+                            <p class="text-xs text-slate-400 leading-relaxed mb-4">
+                                Interactive SVG curve editor. Drag control handles (`CP1`, `CP2`) to define custom organic silhouettes, waist hour-glasses, or flared bell shapes in real time.
+                            </p>
+                        </div>
+                        <div class="pt-3 border-t border-slate-800/80 flex items-center justify-between text-xs">
+                            <span class="text-slate-400 font-mono text-[11px]">Direct Drag Handles</span>
+                            <a href="lampshade_studio.html" class="text-amber-400 hover:text-amber-300 font-medium inline-flex items-center gap-1">
+                                <span>Try in Studio</span> &rarr;
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Feature 6: Standard Hardware Sockets -->
+                <div class="group bg-slate-900/90 border border-slate-800 rounded-2xl overflow-hidden hover:border-amber-500/50 transition-all duration-300 shadow-xl flex flex-col">
+                    <div class="relative h-60 overflow-hidden bg-slate-950">
+                        <img src="public/images/luminaprint/pleated-flared-pendant.png"
+                            alt="Pleated flared pendant lampshade with brass socket fitting and exposed filament bulb"
+                            loading="lazy"
+                            class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                        <span class="absolute top-3 left-3 bg-slate-950/80 backdrop-blur-md text-[10px] text-amber-400 font-mono px-2.5 py-1 rounded-md border border-slate-800">
+                            Hardware Fit
+                        </span>
+                    </div>
+                    <div class="p-6 flex-1 flex flex-col justify-between">
+                        <div>
+                            <h3 class="text-base font-bold text-white mb-2">Integrated Spider Mounts</h3>
+                            <p class="text-xs text-slate-400 leading-relaxed mb-4">
+                                Built-in structural mounting rings for standard hardware: E27/E26 (41mm), E14 European (29mm), or 10mm pendant cord grips with 3 to 6 reinforcing spokes.
+                            </p>
+                        </div>
+                        <div class="pt-3 border-t border-slate-800/80 flex items-center justify-between text-xs">
+                            <span class="text-slate-400 font-mono text-[11px]">E27 &bull; E14 &bull; Cord Grip</span>
+                            <a href="lampshade_studio.html" class="text-amber-400 hover:text-amber-300 font-medium inline-flex items-center gap-1">
+                                <span>Try in Studio</span> &rarr;
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- 4. Design Gallery Section -->
+    <section id="gallery" class="py-20 sm:py-28 bg-slate-950 relative border-b border-slate-800/80">
+        <div class="max-w-7xl mx-auto px-4 sm:px-8">
+            <!-- Section Header -->
+            <div class="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">
+                <div>
+                    <div class="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-amber-400 mb-2">
+                        <span>Lighting Showcase</span>
+                    </div>
+                    <h2 class="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">
+                        Curated 3D-Printed Design Gallery
+                    </h2>
+                    <p class="text-sm text-slate-400 mt-2 max-w-xl">
+                        Explore real physical lampshades generated with LuminaPrint 3D algorithms. Click any design to view full details or open directly in the CAD studio.
+                    </p>
+                </div>
+
+                <!-- Gallery Category Filter Tabs -->
+                <div class="flex flex-wrap items-center gap-1.5 bg-slate-900 border border-slate-800 p-1 rounded-xl text-xs font-medium self-start">
+                    <button class="gallery-filter-btn active bg-amber-500 text-slate-950 font-bold px-3 py-1.5 rounded-lg transition" data-filter="all">
+                        All (21)
+                    </button>
+                    <button class="gallery-filter-btn text-slate-400 hover:text-white px-3 py-1.5 rounded-lg transition" data-filter="ribbed">
+                        Ribbed &amp; Waves
+                    </button>
+                    <button class="gallery-filter-btn text-slate-400 hover:text-white px-3 py-1.5 rounded-lg transition" data-filter="voronoi">
+                        Voronoi Cutouts
+                    </button>
+                    <button class="gallery-filter-btn text-slate-400 hover:text-white px-3 py-1.5 rounded-lg transition" data-filter="pleated">
+                        Pleated Fins
+                    </button>
+                    <button class="gallery-filter-btn text-slate-400 hover:text-white px-3 py-1.5 rounded-lg transition" data-filter="origami">
+                        Origami &amp; Knurl
+                    </button>
+                </div>
+            </div>
+
+            <!-- Dynamic Gallery Grid -->
+            <div id="galleryGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+
+                <!-- 1. Hero Diamond Lantern -->
+                <div class="gallery-card group bg-slate-900/80 border border-slate-800 hover:border-amber-500/50 rounded-2xl overflow-hidden transition-all duration-300 flex flex-col cursor-pointer"
+                    data-category="origami"
+                    data-title="Nordic Origami Diamond Pendant"
+                    data-desc="White translucent diamond-faceted pendant lamp casting a warm diffused ambient glow, styled in a minimalist interior."
+                    data-img="public/images/luminaprint/hero-diamond-lantern.png"
+                    data-specs="H: 220mm | Ø: 140mm | E27 Mount">
+                    <div class="relative aspect-square overflow-hidden bg-slate-950">
+                        <img src="public/images/luminaprint/hero-diamond-lantern.png" alt="Nordic Origami Diamond Pendant" loading="lazy" class="w-full h-full object-cover" />
+                        <span class="absolute top-2.5 right-2.5 bg-slate-950/80 backdrop-blur-md text-[10px] text-amber-400 font-mono px-2 py-0.5 rounded border border-slate-800">Origami</span>
+                    </div>
+                    <div class="p-4 flex-1 flex flex-col justify-between">
+                        <div>
+                            <h4 class="text-sm font-bold text-white group-hover:text-amber-400 transition mb-1">Nordic Diamond Pendant</h4>
+                            <p class="text-xs text-slate-400 line-clamp-2">Translucent white origami facets with warm amber interior glow.</p>
+                        </div>
+                        <div class="mt-3 pt-2.5 border-t border-slate-800 flex items-center justify-between text-[11px] text-slate-400 font-mono">
+                            <span>H: 220mm</span>
+                            <span class="text-amber-400 group-hover:underline">Inspect &rarr;</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 2. Hero Faceted Globe -->
+                <div class="gallery-card group bg-slate-900/80 border border-slate-800 hover:border-amber-500/50 rounded-2xl overflow-hidden transition-all duration-300 flex flex-col cursor-pointer"
+                    data-category="origami"
+                    data-title="Icosahedral Geometric Globe"
+                    data-desc="Faceted spherical geometric pendant lamp casting soft multi-directional illumination."
+                    data-img="public/images/luminaprint/hero-faceted-globe.png"
+                    data-specs="H: 180mm | Ø: 180mm | E27 Socket">
+                    <div class="relative aspect-square overflow-hidden bg-slate-950">
+                        <img src="public/images/luminaprint/hero-faceted-globe.png" alt="Icosahedral Geometric Globe" loading="lazy" class="w-full h-full object-cover" />
+                        <span class="absolute top-2.5 right-2.5 bg-slate-950/80 backdrop-blur-md text-[10px] text-amber-400 font-mono px-2 py-0.5 rounded border border-slate-800">Origami</span>
+                    </div>
+                    <div class="p-4 flex-1 flex flex-col justify-between">
+                        <div>
+                            <h4 class="text-sm font-bold text-white group-hover:text-amber-400 transition mb-1">Icosahedral Geometric Globe</h4>
+                            <p class="text-xs text-slate-400 line-clamp-2">Faceted spherical geometric lantern casting warm light.</p>
+                        </div>
+                        <div class="mt-3 pt-2.5 border-t border-slate-800 flex items-center justify-between text-[11px] text-slate-400 font-mono">
+                            <span>Ø: 180mm</span>
+                            <span class="text-amber-400 group-hover:underline">Inspect &rarr;</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 3. Helical Table Lamp -->
+                <div class="gallery-card group bg-slate-900/80 border border-slate-800 hover:border-amber-500/50 rounded-2xl overflow-hidden transition-all duration-300 flex flex-col cursor-pointer"
+                    data-category="ribbed"
+                    data-title="Twisted Helical Table Luminaire"
+                    data-desc="Smooth organic sinusoidal ribs twisted into a helical hourglass table lamp sitting in an ambient living room."
+                    data-img="public/images/luminaprint/lifestyle-helical-lamp.png"
+                    data-specs="H: 210mm | Ø: 130mm | Bottom Socket">
+                    <div class="relative aspect-square overflow-hidden bg-slate-950">
+                        <img src="public/images/luminaprint/lifestyle-helical-lamp.png" alt="Twisted Helical Table Luminaire" loading="lazy" class="w-full h-full object-cover" />
+                        <span class="absolute top-2.5 right-2.5 bg-slate-950/80 backdrop-blur-md text-[10px] text-amber-400 font-mono px-2 py-0.5 rounded border border-slate-800">Ribbed</span>
+                    </div>
+                    <div class="p-4 flex-1 flex flex-col justify-between">
+                        <div>
+                            <h4 class="text-sm font-bold text-white group-hover:text-amber-400 transition mb-1">Twisted Helical Luminaire</h4>
+                            <p class="text-xs text-slate-400 line-clamp-2">Sinusoidal wave ribs with 180° twist on wooden table mount.</p>
+                        </div>
+                        <div class="mt-3 pt-2.5 border-t border-slate-800 flex items-center justify-between text-[11px] text-slate-400 font-mono">
+                            <span>H: 210mm</span>
+                            <span class="text-amber-400 group-hover:underline">Inspect &rarr;</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 4. Obsidian Origami Knurl -->
+                <div class="gallery-card group bg-slate-900/80 border border-slate-800 hover:border-amber-500/50 rounded-2xl overflow-hidden transition-all duration-300 flex flex-col cursor-pointer"
+                    data-category="origami"
+                    data-title="Obsidian Knurl Pendant"
+                    data-desc="Matte charcoal black geometric diamond knurled pendant with amber light escaping through diamond apertures."
+                    data-img="public/images/luminaprint/origami-knurl-black.png"
+                    data-specs="H: 160mm | Ø: 120mm | Cord Grip">
+                    <div class="relative aspect-square overflow-hidden bg-slate-950">
+                        <img src="public/images/luminaprint/origami-knurl-black.png" alt="Obsidian Knurl Pendant" loading="lazy" class="w-full h-full object-cover" />
+                        <span class="absolute top-2.5 right-2.5 bg-slate-950/80 backdrop-blur-md text-[10px] text-amber-400 font-mono px-2 py-0.5 rounded border border-slate-800">Knurl</span>
+                    </div>
+                    <div class="p-4 flex-1 flex flex-col justify-between">
+                        <div>
+                            <h4 class="text-sm font-bold text-white group-hover:text-amber-400 transition mb-1">Obsidian Knurl Pendant</h4>
+                            <p class="text-xs text-slate-400 line-clamp-2">Matte black shell with radiant amber diamond windows.</p>
+                        </div>
+                        <div class="mt-3 pt-2.5 border-t border-slate-800 flex items-center justify-between text-[11px] text-slate-400 font-mono">
+                            <span>H: 160mm</span>
+                            <span class="text-amber-400 group-hover:underline">Inspect &rarr;</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 5. Ribbed Sinusoidal Glow -->
+                <div class="gallery-card group bg-slate-900/80 border border-slate-800 hover:border-amber-500/50 rounded-2xl overflow-hidden transition-all duration-300 flex flex-col cursor-pointer"
+                    data-category="ribbed"
+                    data-title="Sinusoidal Ambient S-Wave"
+                    data-desc="Macro detail of 3D-printed translucent PLA showing layered sinusoidal wave lines and warm diffusion."
+                    data-img="public/images/luminaprint/ribbed-sinusoidal-glow.png"
+                    data-specs="H: 190mm | 24 Ribs | 5.5mm Depth">
+                    <div class="relative aspect-square overflow-hidden bg-slate-950">
+                        <img src="public/images/luminaprint/ribbed-sinusoidal-glow.png" alt="Sinusoidal Ambient S-Wave" loading="lazy" class="w-full h-full object-cover" />
+                        <span class="absolute top-2.5 right-2.5 bg-slate-950/80 backdrop-blur-md text-[10px] text-amber-400 font-mono px-2 py-0.5 rounded border border-slate-800">Ribbed</span>
+                    </div>
+                    <div class="p-4 flex-1 flex flex-col justify-between">
+                        <div>
+                            <h4 class="text-sm font-bold text-white group-hover:text-amber-400 transition mb-1">Sinusoidal Ambient S-Wave</h4>
+                            <p class="text-xs text-slate-400 line-clamp-2">Hourglass waist with fluted vertical ambient lighting.</p>
+                        </div>
+                        <div class="mt-3 pt-2.5 border-t border-slate-800 flex items-center justify-between text-[11px] text-slate-400 font-mono">
+                            <span>24 Ribs</span>
+                            <span class="text-amber-400 group-hover:underline">Inspect &rarr;</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 6. Voronoi Cellular Pendant -->
+                <div class="gallery-card group bg-slate-900/80 border border-slate-800 hover:border-amber-500/50 rounded-2xl overflow-hidden transition-all duration-300 flex flex-col cursor-pointer"
+                    data-category="voronoi"
+                    data-title="Voronoi Cellular Column"
+                    data-desc="Seamless 360° cylindrical Voronoi cutout lantern with solid rim safety margins."
+                    data-img="public/images/luminaprint/voronoi-cellular-pendant.png"
+                    data-specs="H: 200mm | 42 Cells | E27 Socket">
+                    <div class="relative aspect-square overflow-hidden bg-slate-950">
+                        <img src="public/images/luminaprint/voronoi-cellular-pendant.png" alt="Voronoi Cellular Column" loading="lazy" class="w-full h-full object-cover" />
+                        <span class="absolute top-2.5 right-2.5 bg-slate-950/80 backdrop-blur-md text-[10px] text-amber-400 font-mono px-2 py-0.5 rounded border border-slate-800">Voronoi</span>
+                    </div>
+                    <div class="p-4 flex-1 flex flex-col justify-between">
+                        <div>
+                            <h4 class="text-sm font-bold text-white group-hover:text-amber-400 transition mb-1">Voronoi Cellular Column</h4>
+                            <p class="text-xs text-slate-400 line-clamp-2">Perforated parametric lattice for intricate light projection.</p>
+                        </div>
+                        <div class="mt-3 pt-2.5 border-t border-slate-800 flex items-center justify-between text-[11px] text-slate-400 font-mono">
+                            <span>42 Cells</span>
+                            <span class="text-amber-400 group-hover:underline">Inspect &rarr;</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 7. Pleated Copper Fins -->
+                <div class="gallery-card group bg-slate-900/80 border border-slate-800 hover:border-amber-500/50 rounded-2xl overflow-hidden transition-all duration-300 flex flex-col cursor-pointer"
+                    data-category="pleated"
+                    data-title="Terracotta Pleated Flare"
+                    data-desc="Crisp architectural pleated fins with helical twist rendered in warm terracotta filament."
+                    data-img="public/images/luminaprint/pleated-fins-copper.png"
+                    data-specs="H: 180mm | 36 Fins | Terracotta">
+                    <div class="relative aspect-square overflow-hidden bg-slate-950">
+                        <img src="public/images/luminaprint/pleated-fins-copper.png" alt="Terracotta Pleated Flare" loading="lazy" class="w-full h-full object-cover" />
+                        <span class="absolute top-2.5 right-2.5 bg-slate-950/80 backdrop-blur-md text-[10px] text-amber-400 font-mono px-2 py-0.5 rounded border border-slate-800">Pleated</span>
+                    </div>
+                    <div class="p-4 flex-1 flex flex-col justify-between">
+                        <div>
+                            <h4 class="text-sm font-bold text-white group-hover:text-amber-400 transition mb-1">Terracotta Pleated Flare</h4>
+                            <p class="text-xs text-slate-400 line-clamp-2">Sharp architectural folding with dynamic twisted sweep.</p>
+                        </div>
+                        <div class="mt-3 pt-2.5 border-t border-slate-800 flex items-center justify-between text-[11px] text-slate-400 font-mono">
+                            <span>36 Fins</span>
+                            <span class="text-amber-400 group-hover:underline">Inspect &rarr;</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 8. Asymmetric Bezier Silhouette -->
+                <div class="gallery-card group bg-slate-900/80 border border-slate-800 hover:border-amber-500/50 rounded-2xl overflow-hidden transition-all duration-300 flex flex-col cursor-pointer"
+                    data-category="ribbed"
+                    data-title="Sculpted Asymmetric Organic Shade"
+                    data-desc="Organic bulge silhouette created by custom 2D Bezier control points and vertical ribs."
+                    data-img="public/images/luminaprint/parametric-asymmetric-vase.png"
+                    data-specs="H: 240mm | Bulge: +35mm | Lamp Base">
+                    <div class="relative aspect-square overflow-hidden bg-slate-950">
+                        <img src="public/images/luminaprint/parametric-asymmetric-vase.png" alt="Sculpted Asymmetric Organic Shade" loading="lazy" class="w-full h-full object-cover" />
+                        <span class="absolute top-2.5 right-2.5 bg-slate-950/80 backdrop-blur-md text-[10px] text-amber-400 font-mono px-2 py-0.5 rounded border border-slate-800">Bezier</span>
+                    </div>
+                    <div class="p-4 flex-1 flex flex-col justify-between">
+                        <div>
+                            <h4 class="text-sm font-bold text-white group-hover:text-amber-400 transition mb-1">Sculpted Organic Silhouette</h4>
+                            <p class="text-xs text-slate-400 line-clamp-2">Expressive 2D Bezier waist bulge on chrome table base.</p>
+                        </div>
+                        <div class="mt-3 pt-2.5 border-t border-slate-800 flex items-center justify-between text-[11px] text-slate-400 font-mono">
+                            <span>H: 240mm</span>
+                            <span class="text-amber-400 group-hover:underline">Inspect &rarr;</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 9. Flared Pleated Pendant -->
+                <div class="gallery-card group bg-slate-900/80 border border-slate-800 hover:border-amber-500/50 rounded-2xl overflow-hidden transition-all duration-300 flex flex-col cursor-pointer"
+                    data-category="pleated"
+                    data-title="Flared Scallop Pendant"
+                    data-desc="Downward-flaring architectural pleated shade with exposed warm filament bulb."
+                    data-img="public/images/luminaprint/pleated-flared-pendant.png"
+                    data-specs="H: 150mm | Ø: 200mm | E27 Socket">
+                    <div class="relative aspect-square overflow-hidden bg-slate-950">
+                        <img src="public/images/luminaprint/pleated-flared-pendant.png" alt="Flared Scallop Pendant" loading="lazy" class="w-full h-full object-cover" />
+                        <span class="absolute top-2.5 right-2.5 bg-slate-950/80 backdrop-blur-md text-[10px] text-amber-400 font-mono px-2 py-0.5 rounded border border-slate-800">Pleated</span>
+                    </div>
+                    <div class="p-4 flex-1 flex flex-col justify-between">
+                        <div>
+                            <h4 class="text-sm font-bold text-white group-hover:text-amber-400 transition mb-1">Flared Scallop Pendant</h4>
+                            <p class="text-xs text-slate-400 line-clamp-2">Wide-angle downward light spread with decorative rim.</p>
+                        </div>
+                        <div class="mt-3 pt-2.5 border-t border-slate-800 flex items-center justify-between text-[11px] text-slate-400 font-mono">
+                            <span>Ø: 200mm</span>
+                            <span class="text-amber-400 group-hover:underline">Inspect &rarr;</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 10. Voronoi Table Lantern -->
+                <div class="gallery-card group bg-slate-900/80 border border-slate-800 hover:border-amber-500/50 rounded-2xl overflow-hidden transition-all duration-300 flex flex-col cursor-pointer"
+                    data-category="voronoi"
+                    data-title="Organic Voronoi Table Vase"
+                    data-desc="Clean white cellular Voronoi vase shade resting on reflective dark wood."
+                    data-img="public/images/luminaprint/voronoi-cellular-vase.png"
+                    data-specs="H: 230mm | 50 Cells | White PLA">
+                    <div class="relative aspect-square overflow-hidden bg-slate-950">
+                        <img src="public/images/luminaprint/voronoi-cellular-vase.png" alt="Organic Voronoi Table Vase" loading="lazy" class="w-full h-full object-cover" />
+                        <span class="absolute top-2.5 right-2.5 bg-slate-950/80 backdrop-blur-md text-[10px] text-amber-400 font-mono px-2 py-0.5 rounded border border-slate-800">Voronoi</span>
+                    </div>
+                    <div class="p-4 flex-1 flex flex-col justify-between">
+                        <div>
+                            <h4 class="text-sm font-bold text-white group-hover:text-amber-400 transition mb-1">Voronoi Table Vase</h4>
+                            <p class="text-xs text-slate-400 line-clamp-2">Tapered neck with structural dual-rim safety margin.</p>
+                        </div>
+                        <div class="mt-3 pt-2.5 border-t border-slate-800 flex items-center justify-between text-[11px] text-slate-400 font-mono">
+                            <span>H: 230mm</span>
+                            <span class="text-amber-400 group-hover:underline">Inspect &rarr;</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 11. Voronoi RGB Cyber Lantern -->
+                <div class="gallery-card group bg-slate-900/80 border border-slate-800 hover:border-amber-500/50 rounded-2xl overflow-hidden transition-all duration-300 flex flex-col cursor-pointer"
+                    data-category="voronoi"
+                    data-title="Cyber Voronoi RGB Cylinder"
+                    data-desc="Black Voronoi outer lattice glowing with dynamic multi-color purple, cyan, and magenta LED diffusion."
+                    data-img="public/images/luminaprint/voronoi-rgb-cylinder.png"
+                    data-specs="H: 200mm | Ø: 110mm | RGB Diffusion">
+                    <div class="relative aspect-square overflow-hidden bg-slate-950">
+                        <img src="public/images/luminaprint/voronoi-rgb-cylinder.png" alt="Cyber Voronoi RGB Cylinder" loading="lazy" class="w-full h-full object-cover" />
+                        <span class="absolute top-2.5 right-2.5 bg-slate-950/80 backdrop-blur-md text-[10px] text-amber-400 font-mono px-2 py-0.5 rounded border border-slate-800">Voronoi</span>
+                    </div>
+                    <div class="p-4 flex-1 flex flex-col justify-between">
+                        <div>
+                            <h4 class="text-sm font-bold text-white group-hover:text-amber-400 transition mb-1">Cyber Voronoi RGB Cylinder</h4>
+                            <p class="text-xs text-slate-400 line-clamp-2">Dense black cellular mesh with gradient color backlight.</p>
+                        </div>
+                        <div class="mt-3 pt-2.5 border-t border-slate-800 flex items-center justify-between text-[11px] text-slate-400 font-mono">
+                            <span>RGB Ready</span>
+                            <span class="text-amber-400 group-hover:underline">Inspect &rarr;</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 12. Forest Sage Origami Artichoke -->
+                <div class="gallery-card group bg-slate-900/80 border border-slate-800 hover:border-amber-500/50 rounded-2xl overflow-hidden transition-all duration-300 flex flex-col cursor-pointer"
+                    data-category="origami"
+                    data-title="Forest Sage Origami Artichoke"
+                    data-desc="Layered origami diamond knurl scales printed in matte Forest Sage PLA with warm interior light."
+                    data-img="public/images/luminaprint/origami-sage-artichoke.png"
+                    data-specs="H: 170mm | Ø: 150mm | Forest Sage">
+                    <div class="relative aspect-square overflow-hidden bg-slate-950">
+                        <img src="public/images/luminaprint/origami-sage-artichoke.png" alt="Forest Sage Origami Artichoke" loading="lazy" class="w-full h-full object-cover" />
+                        <span class="absolute top-2.5 right-2.5 bg-slate-950/80 backdrop-blur-md text-[10px] text-amber-400 font-mono px-2 py-0.5 rounded border border-slate-800">Origami</span>
+                    </div>
+                    <div class="p-4 flex-1 flex flex-col justify-between">
+                        <div>
+                            <h4 class="text-sm font-bold text-white group-hover:text-amber-400 transition mb-1">Sage Origami Artichoke</h4>
+                            <p class="text-xs text-slate-400 line-clamp-2">Overlapping multi-faceted geometric light scatter.</p>
+                        </div>
+                        <div class="mt-3 pt-2.5 border-t border-slate-800 flex items-center justify-between text-[11px] text-slate-400 font-mono">
+                            <span>Sage Green</span>
+                            <span class="text-amber-400 group-hover:underline">Inspect &rarr;</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 13. Voronoi Terracotta Band -->
+                <div class="gallery-card group bg-slate-900/80 border border-slate-800 hover:border-amber-500/50 rounded-2xl overflow-hidden transition-all duration-300 flex flex-col cursor-pointer"
+                    data-category="voronoi"
+                    data-title="Terracotta Cutout Margin Band"
+                    data-desc="Terracotta parametric shade featuring solid upper bell and perforated cellular base rim."
+                    data-img="public/images/luminaprint/voronoi-terracotta-band.png"
+                    data-specs="H: 190mm | Base Margin: 25mm | Terracotta">
+                    <div class="relative aspect-square overflow-hidden bg-slate-950">
+                        <img src="public/images/luminaprint/voronoi-terracotta-band.png" alt="Terracotta Cutout Margin Band" loading="lazy" class="w-full h-full object-cover" />
+                        <span class="absolute top-2.5 right-2.5 bg-slate-950/80 backdrop-blur-md text-[10px] text-amber-400 font-mono px-2 py-0.5 rounded border border-slate-800">Voronoi</span>
+                    </div>
+                    <div class="p-4 flex-1 flex flex-col justify-between">
+                        <div>
+                            <h4 class="text-sm font-bold text-white group-hover:text-amber-400 transition mb-1">Terracotta Margin Band</h4>
+                            <p class="text-xs text-slate-400 line-clamp-2">Solid dual-wall bell transition into cellular lower rim.</p>
+                        </div>
+                        <div class="mt-3 pt-2.5 border-t border-slate-800 flex items-center justify-between text-[11px] text-slate-400 font-mono">
+                            <span>Margin Fit</span>
+                            <span class="text-amber-400 group-hover:underline">Inspect &rarr;</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 14. Chevron Origami Globe -->
+                <div class="gallery-card group bg-slate-900/80 border border-slate-800 hover:border-amber-500/50 rounded-2xl overflow-hidden transition-all duration-300 flex flex-col cursor-pointer"
+                    data-category="origami"
+                    data-title="Origami Chevron Lantern"
+                    data-desc="Chevron fold diamond spherical pendant lamp providing uniform 360-degree light dispersion."
+                    data-img="public/images/luminaprint/origami-chevron-sphere.png"
+                    data-specs="H: 180mm | Ø: 180mm | E27 Socket">
+                    <div class="relative aspect-square overflow-hidden bg-slate-950">
+                        <img src="public/images/luminaprint/origami-chevron-sphere.png" alt="Origami Chevron Lantern" loading="lazy" class="w-full h-full object-cover" />
+                        <span class="absolute top-2.5 right-2.5 bg-slate-950/80 backdrop-blur-md text-[10px] text-amber-400 font-mono px-2 py-0.5 rounded border border-slate-800">Origami</span>
+                    </div>
+                    <div class="p-4 flex-1 flex flex-col justify-between">
+                        <div>
+                            <h4 class="text-sm font-bold text-white group-hover:text-amber-400 transition mb-1">Origami Chevron Lantern</h4>
+                            <p class="text-xs text-slate-400 line-clamp-2">Uniform spherical origami chevron fold pattern.</p>
+                        </div>
+                        <div class="mt-3 pt-2.5 border-t border-slate-800 flex items-center justify-between text-[11px] text-slate-400 font-mono">
+                            <span>Ø: 180mm</span>
+                            <span class="text-amber-400 group-hover:underline">Inspect &rarr;</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 15. Rhombic Cube Lattice -->
+                <div class="gallery-card group bg-slate-900/80 border border-slate-800 hover:border-amber-500/50 rounded-2xl overflow-hidden transition-all duration-300 flex flex-col cursor-pointer"
+                    data-category="origami"
+                    data-title="Rhombic Cube Lattice Cylinder"
+                    data-desc="3D isometric rhombic cube surface pattern creating an optical tessellation texture."
+                    data-img="public/images/luminaprint/geometric-rhombic-lattice.png"
+                    data-specs="H: 220mm | Ø: 130mm | Cylindrical">
+                    <div class="relative aspect-square overflow-hidden bg-slate-950">
+                        <img src="public/images/luminaprint/geometric-rhombic-lattice.png" alt="Rhombic Cube Lattice Cylinder" loading="lazy" class="w-full h-full object-cover" />
+                        <span class="absolute top-2.5 right-2.5 bg-slate-950/80 backdrop-blur-md text-[10px] text-amber-400 font-mono px-2 py-0.5 rounded border border-slate-800">Geometric</span>
+                    </div>
+                    <div class="p-4 flex-1 flex flex-col justify-between">
+                        <div>
+                            <h4 class="text-sm font-bold text-white group-hover:text-amber-400 transition mb-1">Rhombic Cube Lattice</h4>
+                            <p class="text-xs text-slate-400 line-clamp-2">Isometric diamond cube illusion with interior lighting.</p>
+                        </div>
+                        <div class="mt-3 pt-2.5 border-t border-slate-800 flex items-center justify-between text-[11px] text-slate-400 font-mono">
+                            <span>Isometric</span>
+                            <span class="text-amber-400 group-hover:underline">Inspect &rarr;</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 16. Emerald Voronoi Dome -->
+                <div class="gallery-card group bg-slate-900/80 border border-slate-800 hover:border-amber-500/50 rounded-2xl overflow-hidden transition-all duration-300 flex flex-col cursor-pointer"
+                    data-category="voronoi"
+                    data-title="Emerald Voronoi Table Dome"
+                    data-desc="Emerald green domed cellular lampshade with royal blue top socket cap."
+                    data-img="public/images/luminaprint/voronoi-emerald-dome.png"
+                    data-specs="H: 160mm | Ø: 130mm | Downward Glow">
+                    <div class="relative aspect-square overflow-hidden bg-slate-950">
+                        <img src="public/images/luminaprint/voronoi-emerald-dome.png" alt="Emerald Voronoi Table Dome" loading="lazy" class="w-full h-full object-cover" />
+                        <span class="absolute top-2.5 right-2.5 bg-slate-950/80 backdrop-blur-md text-[10px] text-amber-400 font-mono px-2 py-0.5 rounded border border-slate-800">Voronoi</span>
+                    </div>
+                    <div class="p-4 flex-1 flex flex-col justify-between">
+                        <div>
+                            <h4 class="text-sm font-bold text-white group-hover:text-amber-400 transition mb-1">Emerald Voronoi Dome</h4>
+                            <p class="text-xs text-slate-400 line-clamp-2">Green cellular dome casting ambient pool of light.</p>
+                        </div>
+                        <div class="mt-3 pt-2.5 border-t border-slate-800 flex items-center justify-between text-[11px] text-slate-400 font-mono">
+                            <span>Dome Profile</span>
+                            <span class="text-amber-400 group-hover:underline">Inspect &rarr;</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 17. Pleated Cone Pendant -->
+                <div class="gallery-card group bg-slate-900/80 border border-slate-800 hover:border-amber-500/50 rounded-2xl overflow-hidden transition-all duration-300 flex flex-col cursor-pointer"
+                    data-category="pleated"
+                    data-title="Nordic Pleated Cone"
+                    data-desc="Clean white architectural pleated cone with modern matte black collar hardware."
+                    data-img="public/images/luminaprint/pleated-cone-pendant.png"
+                    data-specs="H: 210mm | Ø: 150mm | Cord Grip">
+                    <div class="relative aspect-square overflow-hidden bg-slate-950">
+                        <img src="public/images/luminaprint/pleated-cone-pendant.png" alt="Nordic Pleated Cone" loading="lazy" class="w-full h-full object-cover" />
+                        <span class="absolute top-2.5 right-2.5 bg-slate-950/80 backdrop-blur-md text-[10px] text-amber-400 font-mono px-2 py-0.5 rounded border border-slate-800">Pleated</span>
+                    </div>
+                    <div class="p-4 flex-1 flex flex-col justify-between">
+                        <div>
+                            <h4 class="text-sm font-bold text-white group-hover:text-amber-400 transition mb-1">Nordic Pleated Cone</h4>
+                            <p class="text-xs text-slate-400 line-clamp-2">Smooth top transitioning to crisp architectural fin pleats.</p>
+                        </div>
+                        <div class="mt-3 pt-2.5 border-t border-slate-800 flex items-center justify-between text-[11px] text-slate-400 font-mono">
+                            <span>Cone Shape</span>
+                            <span class="text-amber-400 group-hover:underline">Inspect &rarr;</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 18. Triangular Origami Table Lamp -->
+                <div class="gallery-card group bg-slate-900/80 border border-slate-800 hover:border-amber-500/50 rounded-2xl overflow-hidden transition-all duration-300 flex flex-col cursor-pointer"
+                    data-category="origami"
+                    data-title="Triangular Tessellation Cylinder"
+                    data-desc="Translucent white triangular origami fold lampshade styled with house plants."
+                    data-img="public/images/luminaprint/origami-triangular-table.png"
+                    data-specs="H: 220mm | Ø: 140mm | Table Stand">
+                    <div class="relative aspect-square overflow-hidden bg-slate-950">
+                        <img src="public/images/luminaprint/origami-triangular-table.png" alt="Triangular Tessellation Cylinder" loading="lazy" class="w-full h-full object-cover" />
+                        <span class="absolute top-2.5 right-2.5 bg-slate-950/80 backdrop-blur-md text-[10px] text-amber-400 font-mono px-2 py-0.5 rounded border border-slate-800">Origami</span>
+                    </div>
+                    <div class="p-4 flex-1 flex flex-col justify-between">
+                        <div>
+                            <h4 class="text-sm font-bold text-white group-hover:text-amber-400 transition mb-1">Triangular Tessellation</h4>
+                            <p class="text-xs text-slate-400 line-clamp-2">Warm triangular geometry on floor/table lamp stand.</p>
+                        </div>
+                        <div class="mt-3 pt-2.5 border-t border-slate-800 flex items-center justify-between text-[11px] text-slate-400 font-mono">
+                            <span>Tessellated</span>
+                            <span class="text-amber-400 group-hover:underline">Inspect &rarr;</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 19. Wavy Minimalist Sphere -->
+                <div class="gallery-card group bg-slate-900/80 border border-slate-800 hover:border-amber-500/50 rounded-2xl overflow-hidden transition-all duration-300 flex flex-col cursor-pointer"
+                    data-category="ribbed"
+                    data-title="Wavy Undulation Sphere"
+                    data-desc="Minimalist white 3D-printed organic sphere with gentle undulating sinusoidal surface texture."
+                    data-img="public/images/luminaprint/ribbed-wavy-sphere.png"
+                    data-specs="H: 170mm | Ø: 170mm | Sphere">
+                    <div class="relative aspect-square overflow-hidden bg-slate-950">
+                        <img src="public/images/luminaprint/ribbed-wavy-sphere.png" alt="Wavy Undulation Sphere" loading="lazy" class="w-full h-full object-cover" />
+                        <span class="absolute top-2.5 right-2.5 bg-slate-950/80 backdrop-blur-md text-[10px] text-amber-400 font-mono px-2 py-0.5 rounded border border-slate-800">Ribbed</span>
+                    </div>
+                    <div class="p-4 flex-1 flex flex-col justify-between">
+                        <div>
+                            <h4 class="text-sm font-bold text-white group-hover:text-amber-400 transition mb-1">Wavy Undulation Sphere</h4>
+                            <p class="text-xs text-slate-400 line-clamp-2">Harmonic sinusoidal wave texture in pure white matte PLA.</p>
+                        </div>
+                        <div class="mt-3 pt-2.5 border-t border-slate-800 flex items-center justify-between text-[11px] text-slate-400 font-mono">
+                            <span>Sphere Bulge</span>
+                            <span class="text-amber-400 group-hover:underline">Inspect &rarr;</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 20. Faceted Terracotta Diamond -->
+                <div class="gallery-card group bg-slate-900/80 border border-slate-800 hover:border-amber-500/50 rounded-2xl overflow-hidden transition-all duration-300 flex flex-col cursor-pointer"
+                    data-category="origami"
+                    data-title="Crimson Faceted Diamond"
+                    data-desc="Bold crimson red faceted diamond origami pendant with modern architectural angles."
+                    data-img="public/images/luminaprint/geometric-diamond-terracotta.png"
+                    data-specs="H: 160mm | Ø: 140mm | Crimson">
+                    <div class="relative aspect-square overflow-hidden bg-slate-950">
+                        <img src="public/images/luminaprint/geometric-diamond-terracotta.png" alt="Crimson Faceted Diamond" loading="lazy" class="w-full h-full object-cover" />
+                        <span class="absolute top-2.5 right-2.5 bg-slate-950/80 backdrop-blur-md text-[10px] text-amber-400 font-mono px-2 py-0.5 rounded border border-slate-800">Origami</span>
+                    </div>
+                    <div class="p-4 flex-1 flex flex-col justify-between">
+                        <div>
+                            <h4 class="text-sm font-bold text-white group-hover:text-amber-400 transition mb-1">Crimson Faceted Diamond</h4>
+                            <p class="text-xs text-slate-400 line-clamp-2">Vibrant saturated accent with diamond origami facets.</p>
+                        </div>
+                        <div class="mt-3 pt-2.5 border-t border-slate-800 flex items-center justify-between text-[11px] text-slate-400 font-mono">
+                            <span>Bold Accent</span>
+                            <span class="text-amber-400 group-hover:underline">Inspect &rarr;</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 21. Lit vs Unlit Comparison (Gallery Item) -->
+                <div class="gallery-card group bg-slate-900/80 border border-slate-800 hover:border-amber-500/50 rounded-2xl overflow-hidden transition-all duration-300 flex flex-col cursor-pointer"
+                    data-category="ribbed"
+                    data-title="Day &amp; Night Dual Illumination"
+                    data-desc="Side-by-side comparison of a 3D-printed helical rib shade in daylight and nighttime illumination."
+                    data-img="public/images/luminaprint/lamp-lit-unlit-comparison.png"
+                    data-specs="Translucent PETG / PLA Material">
+                    <div class="relative aspect-square overflow-hidden bg-slate-950">
+                        <img src="public/images/luminaprint/lamp-lit-unlit-comparison.png" alt="Day & Night Dual Illumination" loading="lazy" class="w-full h-full object-cover" />
+                        <span class="absolute top-2.5 right-2.5 bg-slate-950/80 backdrop-blur-md text-[10px] text-amber-400 font-mono px-2 py-0.5 rounded border border-slate-800">Ribbed</span>
+                    </div>
+                    <div class="p-4 flex-1 flex flex-col justify-between">
+                        <div>
+                            <h4 class="text-sm font-bold text-white group-hover:text-amber-400 transition mb-1">Day vs Night Illumination</h4>
+                            <p class="text-xs text-slate-400 line-clamp-2">Sculptural daytime form transforming into a luminous night glow.</p>
+                        </div>
+                        <div class="mt-3 pt-2.5 border-t border-slate-800 flex items-center justify-between text-[11px] text-slate-400 font-mono">
+                            <span>Comparison</span>
+                            <span class="text-amber-400 group-hover:underline">Inspect &rarr;</span>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- 5. How It Works Section (Clear 4-Step Technical Workflow) -->
+    <section id="how-it-works" class="py-20 sm:py-28 bg-slate-900/40 relative border-b border-slate-800/80">
+        <div class="max-w-7xl mx-auto px-4 sm:px-8">
+            <div class="text-center max-w-2xl mx-auto mb-16">
+                <div class="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-amber-400 mb-2">
+                    <span>Workflow Architecture</span>
+                </div>
+                <h2 class="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">
+                    From Concept to Slicer in Four Steps
+                </h2>
+                <p class="text-sm text-slate-400 mt-2">
+                    LuminaPrint 3D handles the complex 3D math and manifold checks automatically.
+                </p>
+            </div>
+
+            <!-- Steps Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <!-- Step 1 -->
+                <div class="bg-slate-950 border border-slate-800 p-6 rounded-2xl relative flex flex-col justify-between">
+                    <div>
+                        <div class="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-400 flex items-center justify-center font-bold text-sm mb-4 font-mono">
+                            01
+                        </div>
+                        <h3 class="text-base font-bold text-white mb-2">Sculpt Silhouette</h3>
+                        <p class="text-xs text-slate-400 leading-relaxed">
+                            Pick Linear, Belly, Hourglass, or S-Wave profiles, or drag 2D Bezier control handles directly on an interactive SVG canvas.
+                        </p>
+                    </div>
+                    <div class="mt-4 pt-3 border-t border-slate-800/80 text-[11px] text-slate-500 font-mono">
+                        Radius &bull; Height &bull; Bulge
+                    </div>
+                </div>
+
+                <!-- Step 2 -->
+                <div class="bg-slate-950 border border-slate-800 p-6 rounded-2xl relative flex flex-col justify-between">
+                    <div>
+                        <div class="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-400 flex items-center justify-center font-bold text-sm mb-4 font-mono">
+                            02
+                        </div>
+                        <h3 class="text-base font-bold text-white mb-2">Surface Texture</h3>
+                        <p class="text-xs text-slate-400 leading-relaxed">
+                            Apply sinusoidal waves, pleated architectural fins, or origami knurling. Dial in rib counts and helical twist up to 360°.
+                        </p>
+                    </div>
+                    <div class="mt-4 pt-3 border-t border-slate-800/80 text-[11px] text-slate-500 font-mono">
+                        Ribs &bull; Fins &bull; Knurl &bull; Twist
+                    </div>
+                </div>
+
+                <!-- Step 3 -->
+                <div class="bg-slate-950 border border-slate-800 p-6 rounded-2xl relative flex flex-col justify-between">
+                    <div>
+                        <div class="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-400 flex items-center justify-center font-bold text-sm mb-4 font-mono">
+                            03
+                        </div>
+                        <h3 class="text-base font-bold text-white mb-2">Cutouts &amp; Hardware</h3>
+                        <p class="text-xs text-slate-400 leading-relaxed">
+                            Activate Voronoi CSG subtractions for perforated light scatter and pick an integrated spider ring for E27, E14, or Cord Grip.
+                        </p>
+                    </div>
+                    <div class="mt-4 pt-3 border-t border-slate-800/80 text-[11px] text-slate-500 font-mono">
+                        Voronoi CSG &bull; Spider Mount
+                    </div>
+                </div>
+
+                <!-- Step 4 -->
+                <div class="bg-slate-950 border border-slate-800 p-6 rounded-2xl relative flex flex-col justify-between">
+                    <div>
+                        <div class="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-400 flex items-center justify-center font-bold text-sm mb-4 font-mono">
+                            04
+                        </div>
+                        <h3 class="text-base font-bold text-white mb-2">Export Binary STL</h3>
+                        <p class="text-xs text-slate-400 leading-relaxed">
+                            Verify the live watertight manifold indicator and click download. STL is pre-rotated to slicer Z-up standard.
+                        </p>
+                    </div>
+                    <div class="mt-4 pt-3 border-t border-slate-800/80 text-[11px] text-slate-500 font-mono">
+                        Watertight &bull; Z-Up &bull; Instant
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 6. 3D Printing & Slicer Guide Section -->
+    <section id="slicer-guide" class="py-20 sm:py-24 bg-slate-950 relative border-b border-slate-800/80">
+        <div class="max-w-7xl mx-auto px-4 sm:px-8">
+            <div class="bg-gradient-to-br from-slate-900 to-slate-950 border border-slate-800 p-8 sm:p-12 rounded-3xl shadow-2xl">
+                <div class="max-w-3xl mb-8">
+                    <div class="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-amber-400 mb-2">
+                        <span>Manufacturing Best Practices</span>
+                    </div>
+                    <h2 class="text-2xl sm:text-3xl font-extrabold text-white tracking-tight mb-3">
+                        3D Slicer Recommendations for Optimal Illumination
+                    </h2>
+                    <p class="text-xs sm:text-sm text-slate-300">
+                        Follow these proven settings in PrusaSlicer, Bambu Studio, OrcaSlicer, or Cura for translucent diffusion and structural strength.
+                    </p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 text-xs text-slate-300">
+                    <div class="bg-slate-950/80 border border-slate-800/80 p-5 rounded-2xl">
+                        <div class="text-amber-400 font-bold text-sm mb-2 flex items-center gap-2">
+                            <span>1. Material Selection</span>
+                        </div>
+                        <p class="text-slate-400 leading-relaxed mb-3">
+                            Use <strong class="text-white">Translucent / Natural PLA or PETG</strong> for bright diffuse ambient lighting, or <strong class="text-white">Matte White</strong> for soft architectural porcelain look.
+                        </p>
+                        <span class="text-[11px] text-amber-300/80 font-mono">&bull; Translucent PLA &bull; PETG</span>
+                    </div>
+
+                    <div class="bg-slate-950/80 border border-slate-800/80 p-5 rounded-2xl">
+                        <div class="text-amber-400 font-bold text-sm mb-2 flex items-center gap-2">
+                            <span>2. Perimeter &amp; Infill</span>
+                        </div>
+                        <p class="text-slate-400 leading-relaxed mb-3">
+                            Set infill to <strong class="text-white">0%</strong>. Use <strong class="text-white">2–3 perimeters</strong> (0.8–1.2mm shell) for hollow shades to ensure light passes without infill shadows.
+                        </p>
+                        <span class="text-[11px] text-amber-300/80 font-mono">&bull; 0% Infill &bull; 2-3 Perimeters</span>
+                    </div>
+
+                    <div class="bg-slate-950/80 border border-slate-800/80 p-5 rounded-2xl">
+                        <div class="text-amber-400 font-bold text-sm mb-2 flex items-center gap-2">
+                            <span>3. Cool LED Bulbs</span>
+                        </div>
+                        <p class="text-slate-400 leading-relaxed mb-3">
+                            Always pair 3D-printed lampshades with modern <strong class="text-white">Cool LED Bulbs</strong> (5W–9W). Avoid incandescent or halogen bulbs to prevent thermal warping.
+                        </p>
+                        <span class="text-[11px] text-amber-300/80 font-mono">&bull; LED Only (Max 12W)</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 7. Promotional Call To Action Banner (Using Second Screenshot as Background) -->
+    <section class="relative cta-banner py-24 sm:py-32 border-b border-slate-800">
+        <div class="max-w-4xl mx-auto px-4 sm:px-8 text-center relative z-10">
+            <span class="inline-flex items-center gap-2 bg-amber-500/10 border border-amber-500/30 px-3.5 py-1.5 rounded-full text-xs text-amber-300 font-medium mb-6">
+                <span>Direct Binary STL Export &bull; No Sign-Up</span>
+            </span>
+
+            <h2 class="text-3xl sm:text-5xl font-extrabold text-white tracking-tight mb-6 leading-tight">
+                Ready to Craft Your Custom <br />
+                <span class="text-transparent bg-clip-text bg-gradient-to-r from-amber-200 via-amber-400 to-amber-500">
+                    3D-Printable Lamp Shade?
+                </span>
+            </h2>
+
+            <p class="text-base sm:text-lg text-slate-300 max-w-2xl mx-auto mb-10 leading-relaxed">
+                Join makers, interior designers, and architects crafting bespoke lighting with LuminaPrint 3D. Open the interactive CAD canvas now.
+            </p>
+
+            <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
+                <a href="lampshade_studio.html"
+                    class="w-full sm:w-auto bg-amber-500 hover:bg-amber-400 active:bg-amber-600 text-slate-950 font-bold px-8 py-4 rounded-xl shadow-2xl text-base flex items-center justify-center gap-2.5 transition duration-200 glow-amber-lg">
+                    <span>Launch 3D Studio</span>
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                    </svg>
+                </a>
+
+                <a href="#gallery"
+                    class="w-full sm:w-auto bg-slate-900/90 hover:bg-slate-800 text-slate-200 border border-slate-700/80 font-semibold px-6 py-4 rounded-xl text-base flex items-center justify-center gap-2 backdrop-blur-md transition">
+                    <span>Browse Gallery</span>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-slate-950 py-12 border-t border-slate-900 text-xs text-slate-500">
+        <div class="max-w-7xl mx-auto px-4 sm:px-8 flex flex-col sm:flex-row items-center justify-between gap-6">
+            <div class="flex items-center gap-2.5">
+                <div class="w-7 h-7 rounded-lg bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400">
+                    <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12 2a7 7 0 0 0-7 7c0 2.38 1.19 4.47 3 5.74V17a2 2 0 0 0 2 2h4a2 2 0 0 0 2-2v-2.26c1.81-1.27 3-3.36 3-5.74a7 7 0 0 0-7-7M9 21a1 1 0 0 0 1 1h4a1 1 0 0 0 1-1v-1H9z" />
+                    </svg>
+                </div>
+                <span class="text-white font-bold">LuminaPrint 3D (LuxPrint)</span>
+                <span>&bull; Open Source Digital Manufacturing</span>
+            </div>
+
+            <div class="flex items-center gap-6 text-slate-400">
+                <a href="lampshade_studio.html" class="hover:text-amber-400 transition">3D Studio</a>
+                <a href="#features" class="hover:text-amber-400 transition">Features</a>
+                <a href="#gallery" class="hover:text-amber-400 transition">Gallery</a>
+                <a href="https://github.com/Ogollas-lab/LuxPrint" target="_blank" rel="noopener noreferrer" class="hover:text-amber-400 transition flex items-center gap-1">
+                    <span>GitHub</span>
+                    <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24"><path fill-rule="evenodd" clip-rule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.53 1.032 1.53 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"/></svg>
+                </a>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Lightbox Modal for Gallery Enlargement -->
+    <div id="imageLightbox" class="fixed inset-0 z-50 bg-slate-950/90 backdrop-blur-md hidden flex items-center justify-center p-4 sm:p-6 opacity-0 transition-opacity duration-300">
+        <div class="relative max-w-4xl w-full bg-slate-900 border border-slate-800 rounded-3xl overflow-hidden shadow-2xl flex flex-col md:flex-row max-h-[90vh]">
+            <!-- Close Button -->
+            <button id="closeLightbox" type="button"
+                class="absolute top-4 right-4 z-20 w-8 h-8 rounded-full bg-slate-950/80 hover:bg-slate-800 text-slate-300 flex items-center justify-center border border-slate-700 transition"
+                title="Close modal">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+            </button>
+
+            <!-- Lightbox Image -->
+            <div class="md:w-3/5 bg-slate-950 flex items-center justify-center p-4">
+                <img id="lightboxImg" src="" alt="Enlarged lamp design" class="max-h-[60vh] md:max-h-[75vh] w-auto object-contain rounded-xl" />
+            </div>
+
+            <!-- Lightbox Details -->
+            <div class="md:w-2/5 p-6 sm:p-8 flex flex-col justify-between border-t md:border-t-0 md:border-l border-slate-800 bg-slate-900/95 overflow-y-auto">
+                <div>
+                    <span id="lightboxCategory" class="inline-block text-[10px] text-amber-400 font-mono uppercase tracking-wider bg-amber-500/10 border border-amber-500/30 px-2.5 py-0.5 rounded-full mb-3">
+                        Category
+                    </span>
+                    <h3 id="lightboxTitle" class="text-xl font-bold text-white mb-2 leading-tight">Lamp Title</h3>
+                    <p id="lightboxDesc" class="text-xs text-slate-300 leading-relaxed mb-4">Description details.</p>
+
+                    <div class="bg-slate-950 p-3.5 rounded-xl border border-slate-800 space-y-1.5 text-xs text-slate-400 font-mono mb-6">
+                        <div class="text-[11px] text-slate-500 uppercase tracking-wider">Specifications</div>
+                        <div id="lightboxSpecs" class="text-slate-200">H: 200mm | Ø: 140mm</div>
+                    </div>
+                </div>
+
+                <div class="space-y-2 pt-4 border-t border-slate-800">
+                    <a href="lampshade_studio.html"
+                        class="w-full bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold py-2.5 px-4 rounded-xl text-xs flex items-center justify-center gap-2 shadow-lg shadow-amber-500/20 transition">
+                        <span>Open Design in 3D Studio</span>
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+                    </a>
+                </div>
+            </div>
+        </div>
     </div>
-  </header>
-  <main>
-    <section class="page-hero">
-      <div class="page-container home-hero-grid">
-        <div>
-          <span class="page-eyebrow">Parametric lighting design</span>
-          <h1 class="home-title">Design light. <em>Shape geometry.</em></h1>
-          <p class="home-intro">LuminaPrint 3D is a browser-based parametric CAD studio for turning creative ideas into customizable, 3D-printable lamp shades and lanterns.</p>
-          <div class="home-actions"><a class="page-action" href="./studio.html">Start designing</a><a class="home-secondary" href="./how-it-works.html">See how it works</a></div>
-          <div class="home-highlights" aria-label="Product highlights"><span>No installation required</span><span>Custom geometry</span><span>STL export</span></div>
-        </div>
-        <div class="home-lamp-stage" role="img" aria-label="Illustration of a warm, vertically ribbed lamp shade">
-          <div class="home-lamp" aria-hidden="true"></div><div class="home-lamp-base" aria-hidden="true"></div>
-          <span class="home-lamp-label">A form made to explore</span>
-        </div>
-      </div>
-    </section>
-    <section class="home-section page-container" aria-labelledby="home-about-heading">
-      <div class="home-overview">
-        <div><span class="page-eyebrow">A digital workshop</span><h2 class="page-section-title" id="home-about-heading">Make a lamp shade your own.</h2></div>
-        <p>Start from a profile, shape its outline, and explore how geometry and light work together. LuminaPrint brings the design controls and 3D preview into your browser, without requiring traditional desktop CAD installation.</p>
-      </div>
-      <div class="home-section-head">
-        <span class="page-eyebrow">Explore LuminaPrint</span>
-        <h2>Choose what you want to learn.</h2>
-        <p>Each guide has its own focus, from the studio's tools to the steps for taking a design into a slicer.</p>
-      </div>
-      <nav class="home-pathways" aria-label="Explore product information">
-        <a class="home-pathway" href="./features.html"><span>Capabilities</span><span>Explore the features →</span></a>
-        <a class="home-pathway" href="./how-it-works.html"><span>Workflow</span><span>See how it works →</span></a>
-        <a class="home-pathway" href="./gallery.html"><span>Inspiration</span><span>Browse design studies →</span></a>
-        <a class="home-pathway" href="./faq.html"><span>Answers</span><span>Read the FAQ →</span></a>
-      </nav>
-    </section>
-  </main>
-  <footer class="page-footer"><div class="page-container page-footer-row"><span>LuminaPrint 3D · A browser-based parametric CAD studio</span><div class="page-footer-links"><a href="./features.html">Features</a><a href="./how-it-works.html">How It Works</a><a href="./gallery.html">Gallery</a><a href="./faq.html">FAQ</a><a href="./studio.html">Open Studio</a><a href="https://github.com/Ogollas-lab/LuxPrint" target="_blank" rel="noreferrer">GitHub</a></div></div></footer>
+
+    <!-- Interactive Client Scripts for Filtering & Lightbox -->
+    <script>
+        // Gallery Category Filtering
+        const filterBtns = document.querySelectorAll('.gallery-filter-btn');
+        const galleryCards = document.querySelectorAll('.gallery-card');
+
+        filterBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                filterBtns.forEach(b => {
+                    b.classList.remove('bg-amber-500', 'text-slate-950', 'font-bold');
+                    b.classList.add('text-slate-400');
+                });
+                btn.classList.add('bg-amber-500', 'text-slate-950', 'font-bold');
+                btn.classList.remove('text-slate-400');
+
+                const filter = btn.dataset.filter;
+                galleryCards.forEach(card => {
+                    if (filter === 'all' || card.dataset.category === filter) {
+                        card.style.display = 'flex';
+                    } else {
+                        card.style.display = 'none';
+                    }
+                });
+            });
+        });
+
+        // Lightbox Modal Handlers
+        const lightbox = document.getElementById('imageLightbox');
+        const lightboxImg = document.getElementById('lightboxImg');
+        const lightboxTitle = document.getElementById('lightboxTitle');
+        const lightboxDesc = document.getElementById('lightboxDesc');
+        const lightboxCategory = document.getElementById('lightboxCategory');
+        const lightboxSpecs = document.getElementById('lightboxSpecs');
+        const closeLightbox = document.getElementById('closeLightbox');
+
+        galleryCards.forEach(card => {
+            card.addEventListener('click', () => {
+                lightboxImg.src = card.dataset.img;
+                lightboxTitle.textContent = card.dataset.title;
+                lightboxDesc.textContent = card.dataset.desc;
+                lightboxCategory.textContent = card.dataset.category.toUpperCase();
+                lightboxSpecs.textContent = card.dataset.specs;
+
+                lightbox.classList.remove('hidden');
+                setTimeout(() => {
+                    lightbox.classList.remove('opacity-0');
+                }, 10);
+            });
+        });
+
+        function hideLightbox() {
+            lightbox.classList.add('opacity-0');
+            setTimeout(() => {
+                lightbox.classList.add('hidden');
+            }, 300);
+        }
+
+        if (closeLightbox) closeLightbox.addEventListener('click', hideLightbox);
+        lightbox.addEventListener('click', (e) => {
+            if (e.target === lightbox) hideLightbox();
+        });
+        window.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') hideLightbox();
+        });
+    </script>
 </body>
+
 </html>
